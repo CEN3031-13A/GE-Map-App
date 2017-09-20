@@ -2,6 +2,7 @@
 //Kassandra Crompton
 //Peter Sun
 //Joshua John
+//Jesse Dubbs
 'use strict';
 
 /**
