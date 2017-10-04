@@ -1,8 +1,10 @@
-//Written by Vishnu Sriram,
-//Kassandra Crompton
-//Peter Sun
-//Joshua John
-//Jesse Dubbs
+// Written by Kassandra Crompton,
+// Jesse Dubbs,
+// Joshua John,
+// Mark Schuster,
+// Vishnu Sriram,
+// Peter Sun.
+
 'use strict';
 
 /**
@@ -10,5 +12,3 @@
  */
 var app = require('./config/lib/app');
 var server = app.start();
-
-// Mark Schuster
