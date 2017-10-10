@@ -1,3 +1,42 @@
+<link rel="import" href="../../../../../lib/px-app-nav/px-app-nav.html"/>
+<px-app-nav style="margin-top:50px"
+            items='[
+                    {"label":"Customer 1","id":"Cust1","icon":"px-fea:asset",
+                        "children":
+                        [
+                          {"label":"Shipment 1","id":"s1"},
+                          {"label":"Shipment 2","id":"s1"}
+                        ]
+                    },
+                    {"label":"Customer 2","id":"Cust2","icon":"px-fea:asset",
+                        "children":
+                        [
+                          {"label":"Shipment 1","id":"s1"},
+                          {"label":"Shipment 2","id":"s1"}
+                        ]
+                    },
+                    {"label":"Customer 3","id":"Cust3","icon":"px-fea:asset",
+                        "children":
+                        [
+                          {"label":"Shipment 1","id":"s1"},
+                          {"label":"Shipment 2","id":"s1"}
+                        ]
+                    },
+                    {"label":"Customer 4","id":"Cust4","icon":"px-fea:asset",
+                        "children":
+                        [
+                          {"label":"Shipment 1","id":"s1"},
+                          {"label":"Shipment 2","id":"s1"}
+                        ]
+                    },
+                    {"label":"Customer 5","id":"Cust5","icon":"px-fea:asset"},
+                    {"label":"Customer 6","id":"Cust6","icon":"px-fea:asset"},
+                    {"label":"Customer 7","id":"Cust7","icon":"px-fea:asset"},
+                    {"label":"Customer 8","id":"Cust8","icon":"px-fea:asset"}
+                  ]'
+                vertical selected-route='["alerts"]'>                
+    </px-app-nav>
+    
 <div class="container" ng-controller="HeaderController">
   <div class="navbar-header">
     <button class="navbar-toggle" type="button" ng-click="toggleCollapsibleMenu()">
