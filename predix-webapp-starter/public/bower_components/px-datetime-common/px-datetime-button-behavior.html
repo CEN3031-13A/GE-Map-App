@@ -1,0 +1,30 @@
+<link rel="import" href="../px-moment-imports/px-moment-imports.html" />
+<link rel="import" href="../iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
+
+<script>
+/**
+
+  ```pxDatetimeButtonBehavior```
+
+  This behavior is for ```px-datetime``` components that can have apply/cancel buttons.
+
+  Dependencies: momentjs
+
+  @polymerBehavior pxDatetimeButtonBehavior
+
+*/
+
+var pxDatetimeButtonBehavior = [{
+
+  properties: {
+    /**
+     * Whether to show Apply and Cancel buttons in the range fields
+     */
+    showButtons: {
+      type: Boolean,
+      value: false
+    }
+  }
+}, Polymer.IronA11yKeysBehavior];
+
+</script>

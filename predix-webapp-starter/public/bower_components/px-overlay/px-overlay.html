@@ -1,0 +1,66 @@
+
+<!--
+    Relative paths assume component is being run from inside an app or another component, where dependencies are flat
+    siblings. When this component is run from its own repo (e.g. ui tests, examples), we assume the server is started with
+    'grunt depserve' (or similar server setup) to enable correct finding of bower dependencies for local runs.
+-->
+<link rel="import" href="../polymer/polymer.html"/>
+
+
+<!--
+You can place the component anywhere on the page, since it has a fixed position, and takes up100vw x 100vh @ z-index position 1000.
+
+##### Usage
+
+    <px-overlay></px-overlay>
+
+### Styling
+The following custom properties are available for styling:
+
+Custom property | Description
+----------------|-------------
+`--px-overlay-color` | Color value for the overlay, should be an rgba value
+
+@element px-overlay
+@blurb Element providing an overlay for use with other components.
+@homepage index.html
+@demo demo.html
+-->
+
+<link rel="import" href="css/px-overlay-styles.html">
+
+<dom-module id="px-overlay">
+    <template>
+      <style include="px-overlay-styles"></style>
+      <div id="overlay"></div>
+    </template>
+</dom-module>
+
+<script>
+    Polymer({
+        is: 'px-overlay',
+        attached: function() {
+            // if a parent was transformed and our overlay is no longer at window origin...
+            var overlayRect = this.getBoundingClientRect();
+            // if the overlay should have a coor of 0,0 unless it has been transformed
+            if (overlayRect['left'] !== 0 || overlayRect['top'] !== 0){
+              var originX = -1 * overlayRect['left'],
+                  originY = -1 * overlayRect['top'];
+
+              // make the overlay a bit bigger in case
+              this.toggleClass('larger',true, this.$.overlay);
+
+              this.style.left = originX + 'px';
+              this.style.top = originY + 'px';
+
+              // it is also no longer fixed, so needs to scroll with window
+              window.addEventListener('scroll',function(){
+                  // document.documentElement for FF and IE
+                  // document.body for webkit
+                  this.style.top = originY + document.body.scrollTop + document.documentElement.scrollTop + 'px';
+                  this.style.left = originX + document.body.scrollLeft + document.documentElement.scrollLeft + 'px';
+              }.bind(this));
+            }
+        }
+    });
+</script>

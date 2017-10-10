@@ -1,0 +1,53 @@
+<link rel="import" href="../polymer/polymer.html"/>
+<link rel="import" href="px-validator.html"/>
+
+<!--
+Element providing built-in as well as developer supplied validation solutions.
+Should be used in combination with [px-forms-design](https://www.predix-ui.com/#/css/px-forms-design/)
+to validate inputs and display appropriate error messages in proximity to the input.
+
+### Usage
+
+    <px-validation>
+      <px-validator validation-method="isNumber" import="px-example-validator.html"></px-validator>
+      <px-validator multi-step-validation='["isNumber", "isRed", "isBlue"]' import="px-example-validator.html"></px-validator>
+    </px-validation>
+
+@element px-validation
+@blurb Element providing built-in as well as developer supplied validation solutions
+@homepage index.html
+@demo index.html
+-->
+<dom-module id="px-validation">
+  <template>
+    <content></content>
+  </template>
+</dom-module>
+
+<script>
+  Polymer({
+    is: 'px-validation',
+    /**
+     * This method loops through each validator and validates the content
+     *
+     * @method {validate}
+     * @param {value}
+     * @return {Boolean}
+     */
+    validate: function(value){
+      var result = {passedValidation : true};
+      var validationResult;
+      Polymer.dom(this).querySelectorAll('px-validator').forEach(function(validatorEl){
+        validatorEl.validators.every(function(validatorMethod){
+          validationResult = validatorMethod(value);
+          if (!validationResult.passedValidation){
+            result = validationResult;
+            return false;
+          }
+        });
+      });
+      return result;
+    }
+
+  });
+</script>

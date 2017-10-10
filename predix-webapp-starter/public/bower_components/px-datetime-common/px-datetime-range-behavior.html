@@ -1,0 +1,233 @@
+<link rel="import" href="px-datetime-shared-behavior.html" />
+
+<script>
+var PxDatetimeBehavior = PxDatetimeBehavior || {};
+
+/*
+    PxDatetimeBehavior.rangeMoments
+
+    Description:
+    Behavior providing the fromMoment and toMoment properties
+    @polymerBehavior PxDatetimeBehavior.rangeMoments
+*/
+PxDatetimeBehavior.rangeMoments = {
+  properties: {
+    /**
+     * Moment object start date & time
+     *
+     * @private
+     */
+    fromMoment: {
+      type: Object,
+      notify: true
+    },
+    /**
+     * Moment object end date & time
+     *
+     * @private
+     */
+    toMoment: {
+      type: Object,
+      notify: true
+    }
+  }
+}
+
+/**
+  ```pxDatetimeRangeBehavior```
+
+  This behavior is for all ```px-{datetime}-range-{picker}``` components.
+
+  Dependencies: momentjs
+
+  @polymerBehavior pxDatetimeRangeBehavior
+*/
+var pxDatetimeRangeBehavior = [{
+
+  properties: {
+
+    /**
+     * (optional:  'px-{datetime}-range-panel')
+     *
+     * The preset date/time ranges to be displayed.
+     *
+     *```
+     *   [
+     *    {
+     *      "displayText": "Last 5 Minutes",
+     *      "startDateTime": "2013-02-04T22:44:30.652Z",
+     *      "endDateTime": "2013-02-04T22:49:30.652Z"
+     *    },
+     *    {
+     *      "displayText": "Last 12 Hours",
+     *      "startDateTime": "2013-02-04T10:44:30.652Z",
+     *      "endDateTime": "2013-02-04T22:49:30.652Z"
+     *    }
+     *   ]
+     * ```
+     *
+     * @default no presetRanges
+     */
+    presetRanges: Object, //may be useless
+
+    /**
+     * (required: 'px-{datetime}-range-{picker}')
+     *
+     * This is the object you use to instantiate px-datetime components. You can retrieve the object through 2-way data-binding.
+     *
+     * Formated as ISO8601 strings
+     * ```
+     * {
+     *    "from": "2013-01-07T22:44:30.652Z",
+     *    "to" : "2013-02-04T22:44:30.652Z"
+     * }
+     * ```
+     *
+     * This object which will be changed when the user Submits their new selected range.
+     *
+     * @default the last 7 days
+     */
+    range: {
+      type: Object,
+      notify: true,
+      value: function() {
+        return {
+          from: Px.moment().subtract(7, 'day').toISOString(),
+          to: Px.moment().toISOString()
+        };
+      }
+    },
+    /**
+     */
+    _preventRangeUpdate: {
+      type: Boolean,
+      value: false
+    }
+  },
+  observers: [
+    '_notifyRangeChanged(range.*)',
+    '_localeChanged(language)',
+    '_timeZoneChanged(timeZone)'
+  ],
+  /**
+   * for legacy purposes
+   */
+  _setRange: function() {
+    if(!this._preventRangeUpdate) {
+      this._setMomentFromRange();
+    }
+  },
+  /**
+   */
+  _localeChanged: function() {
+    //make sure the moment obj pick up the possibly new moment locale
+    if(this.fromMoment) {
+      this.set('fromMoment', this.fromMoment.locale(Px.moment.locale()));
+    }
+    if(this.toMoment) {
+      this.set('toMoment', this.toMoment.locale(Px.moment.locale()));
+    }
+  },
+  /**
+   * Converts range into from and to moments
+   *
+   * Triggered from a click on cancel, submit, esc, or enter
+   */
+  _setMomentFromRange: function() {
+    // set to and from based on inputed range
+    if(this.fromMoment.toISOString() !== this.range.from) {
+      this.set('fromMoment', this._convertISOtoMoment(this.range.from));
+    }
+    if(this.toMoment.toISOString() !== this.range.to) {
+      this.set('toMoment', this._convertISOtoMoment(this.range.to));
+    }
+  },
+  /**
+   * Converts 'toMoment' and 'fromMoment' to ISO8601 strings, then set the range with the strings.
+   *
+   * Triggered from a click on cancel, submit, esc, or enter
+   */
+  _setRangeFromMoment: function() {
+    if(!this.range || (this.fromMoment.toISOString() !== this.range.from ||
+       this.toMoment.toISOString() !== this.range.to)) {
+      var newRange = {
+        from: this.fromMoment.toISOString(),
+        to: this.toMoment.toISOString()
+      };
+      this.set('range', newRange);
+    }
+  },
+  /**
+   * Applies the current 'from' and 'to' moment objects to the external facing 'range' strings
+   **/
+  _applyMomentToString: function() {
+    this._setRangeFromMoment();
+  },
+  /**
+   * Rollbacks the current 'from' and 'to' moment objects to the external facing 'range' strings
+   **/
+  _rollbackMomentFromString: function() {
+    this._setMomentFromRange();
+  },
+  /**
+   * makes sure the moment objects reflect the timezone
+   */
+  _timeZoneChanged: function() {
+    if(this.fromMoment) {
+      var newMom = this.fromMoment.clone().tz(this.timeZone);
+      this.set('fromMoment', newMom);
+    }
+    if(this.toMoment) {
+      newMom = this.toMoment.clone().tz(this.timeZone);
+      this.set('toMoment', newMom);
+    }
+  },
+  /**
+   * Validation for the range. Makes sure the ranges are in chronological order
+   *
+   * @return {Boolean} true if chronological order, false otherwise
+   */
+  _validateRangeOrder: function() {
+    // if the from date is before the to date, everything is ok
+    if(this.fromMoment && this.toMoment) {
+      return this.fromMoment.isBefore(this.toMoment);
+    }else {
+      return false;
+    }
+  },
+  /**
+   * This event is fired differently depending on config:
+   *  - If the px-datetime component has an Apply button, then it is fired when the
+   *   user clicks the Apply button (or presses enter) AND the selected date/time is valid
+   *  - If the px-datetime component does not have an Apply button, then it is fired
+   *   every time a change is made to the date/time AND the selected date/time is valid
+   *
+   * @event px-datetime-range-submitted
+   * @param {object} range - {from, to} the ISO 8601 strings representing the date/time chosen by the user
+   * @param {object} momentObjs - {from, to}: the moment.js objects representing the date/time chosen by the user
+   */
+  _notifyRangeChanged: function(r) {
+    var newRange = r.value;
+
+    if(!this._preventRangeUpdate) {
+      this._preventRangeUpdate = true;
+
+      //make sure we keep the moment synchronized in case range has been changed externally
+      if(!this.fromMoment || this.fromMoment.toISOString() !== newRange.from) {
+        this.set('fromMoment', this._convertISOtoMoment(newRange.from));
+      }
+      if(!this.toMoment || this.toMoment.toISOString() !== newRange.to) {
+        this.set('toMoment', this._convertISOtoMoment(newRange.to));
+      }
+
+      this.range = newRange;
+
+      //notify the range has changed
+      this.fire('px-datetime-range-submitted', {range: this.range, momentObjs: {from: this.fromMoment, to: this.toMoment}});
+      this._preventRangeUpdate = false;
+    }
+  }
+}, pxDatetimeSharedBehavior, PxDatetimeBehavior.rangeMoments];
+
+
+</script>

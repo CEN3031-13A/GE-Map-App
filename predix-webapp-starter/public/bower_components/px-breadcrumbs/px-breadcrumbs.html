@@ -1,0 +1,61 @@
+<!--
+    Relative paths assume component is being run from inside an app or another component, where dependencies are flat
+    siblings. When this component is run from its own repo (e.g. tests, examples), we assume the server is started with
+    'gulp serve' (or similar server setup) to enable correct finding of bower dependencies for local runs.
+-->
+<link rel="import" href="../polymer/polymer.html"/>
+<link rel="import" href="../px-icon-set/px-icon-set.html"/>
+<link rel="import" href="../px-icon-set/px-icon.html"/>
+<link rel="import" href="../px-dropdown/px-dropdown.html"/>
+<link rel="import" href="css/px-breadcrumbs-styles.html">
+<link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../px-app-helpers/px-app-asset/px-app-asset-behavior-graph.html"/>
+<link rel="import" href="../px-app-helpers/px-app-asset/px-app-asset-behavior-selectable.html"/>
+
+<!--
+
+### Usage
+Note: you **must** provide either `selected` or `selectedRoute` or the breadcrumb will not know
+what path to display and therefore will not appear at all.
+
+    <px-breadcrumbs items='[[items]]' selectedRoute='["id1"]'></px-breadcrumbs>
+
+
+@element px-breadcrumbs
+@blurb Breadcrumb drop down displays the navigational path of the user through a context browser.
+The breadcrumb links provide a way to see the path of navigation or contextual relationship between objects.
+It also provides a quick way to navigate backwards within a path or within a specific context.
+@homepage index.html
+@demo index.html
+-->
+
+<dom-module id="px-breadcrumbs">
+  <template>
+    <style include="px-breadcrumbs-styles"></style>
+    <div class="container flex">
+      <ul class="topPath">
+        <template is="dom-repeat" items="[[_mainPathItems]]">
+          <template is="dom-if" if="[[_isNotFirstItemInData(index, _mainPathItems)]]">
+            <li class="breadcrumbTopItem flex flex--middle">
+              <span class$="rightAngle [[_getSeparatorSize(clickOnlyMode)]]"><px-icon icon="px-utl:chevron-right"></px-icon></span>
+            </li>
+          </template>
+          <li data-text="[[item.label]]" data-item="[[item]]" data-index="[[index]]" class="breadcrumbTopItem u-ph- flex flex--row flex--middle" on-tap="_onPathTap">
+            <template is="dom-if" if="[[_isLabel(item, clickOnlyMode)]]">
+              <span class="actionable actionable--action">[[item.label]]</span>
+            </template>
+            <template is="dom-if" if="[[_isDropdown(item, clickOnlyMode)]]">
+              <px-dropdown display-value="[[item.label]]" items="[[_clickedItemChildren]]" search-mode="[[searchMode]]" button-style="bare" disable-clear></px-dropdown>
+            </template>
+            <template is="dom-if" if="[[_isOverflow(item)]]">
+              <px-dropdown id="dropdown" items="[[_clickedItemChildren]]" button-style="icon" icon="px-nav:more"></px-dropdown>
+            </template>
+          </li>
+        </template>
+      </ul>
+      </div>
+
+
+  </template>
+</dom-module>
+<script src="px-breadcrumbs.es6.js"></script>

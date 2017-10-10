@@ -1,0 +1,136 @@
+<link rel="import" href="../polymer/polymer.html"/>
+<link rel="import" href="px-datetime-behavior.html"/>
+<link rel="import" href="validate.html"/>
+<link rel="import" href="../app-localize-behavior/app-localize-behavior.html" />
+<link rel="import" href="css/px-datetime-buttons-styles.html">
+
+<!--
+Date time button component.
+
+### Usage
+
+    <px-datetime-button>
+    </px-rangepicker-modal>
+
+@element px-datetime-buttons
+@homepage index.html
+@demo index.html
+-->
+<dom-module id="px-datetime-buttons">
+  <template>
+    <style include="px-datetime-buttons-styles"></style>
+    <div class="flex">
+      <template is="dom-if" if="{{ !hideCancel }}">
+        <button type="button" class="btn u-mr-" on-tap="_fireCancelEvent">[[localize('Cancel')]]</button>
+      </template>
+      <template is="dom-if" if="{{ !hideSubmit }}">
+        <button class$="{{submitBtnClasses('btn btn--primary', isSubmitButtonValid)}}"
+                type="button"
+                on-tap="_fireSubmitEvent"
+                id="submitButton"
+                disabled="{{!isSubmitButtonValid}}">
+        <i class$="{{submitIcon}}"></i>[[localize('Apply')]]</button>
+      </template>
+    </div>
+  </template>
+</dom-module>
+<script>
+  Polymer({
+
+    is: 'px-datetime-buttons',
+
+    behaviors: [
+      validate,
+      Polymer.AppLocalizeBehavior
+    ],
+
+    properties: {
+      /**
+       * Whether the Submit button should be valid
+       */
+      isSubmitButtonValid: {
+        type: Boolean,
+        value: true
+      },
+      /**
+       * Hides the Submit button when true
+       */
+      hideSubmit:{
+        type:Boolean,
+        value: false
+      },
+       /**
+        * Hides the Cancel button when 'hide'
+        */
+      hideCancel:{
+        type:Boolean,
+        value: false
+      },
+      /**
+       * Icon to be used for the Submit button
+       */
+      submitIcon: {
+        type: String
+      },
+      /**
+       * List of key/values to be included for translating this component
+       */
+      resources: {
+        type: Object,
+        value: function() {
+          return {
+            'en': {
+              'Cancel': 'Cancel',
+              'Apply': 'Apply'
+            }
+          };
+        }
+      },
+     /**
+      * set a default for localizing
+      */
+     language: {
+       type: String,
+       value: 'en'
+     },
+     /**
+      * Use the key for localization if value for  language is missing. Should
+      * always be true for  our components
+      */
+     useKeyIfMissing: {
+       type: Boolean,
+       value: true
+     }
+
+    },
+    observers: [
+      '_submitButtonState(isSubmitButtonValid)'
+    ],
+    /**
+     *
+     */
+    _fireCancelEvent:function(){
+      this.fire('px-datetime-button-clicked',{ action:false });
+    },
+    /**
+     *
+     */
+    _fireSubmitEvent:function(){
+      this.fire('px-datetime-button-clicked',{ action:true });
+    },
+    /**
+     *
+     */
+    submitBtnClasses: function(base, submitButtonValid) {
+      return (submitButtonValid) ? base : base + ' btn--disabled';
+    },
+    /**
+     *
+     */
+    _isEqual: function(source, target) {
+      console.log(source);
+      console.log(target);
+      return source === target;
+    }
+  });
+</script>

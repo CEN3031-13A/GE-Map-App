@@ -1,0 +1,146 @@
+<link rel="import" href="../px-moment-imports/px-moment-imports.html" />
+<link rel="import" href="../iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
+<link rel="import" href="../app-localize-behavior/app-localize-behavior.html" />
+
+<script>
+var PxDatetimeBehavior = PxDatetimeBehavior || {};
+/*
+    PxDatetimeBehavior.blockDates
+
+    Description:
+    Behavior providing the blockPastDates and blockFutureDates properties
+    @polymerBehavior PxDatetimeBehavior.blockDates
+*/
+PxDatetimeBehavior.blockDates = {
+  properties: {
+    /**
+     * Set this attribute when you do not want to allow future dates to be selected (future dates will be disabled and unclickable).
+     */
+    blockFutureDates: {
+      type: Boolean,
+      value: false
+    },
+    /**
+     * Set this attribute when you do not want to allow past dates to be selected (past dates will be disabled and unclickable).
+     */
+    blockPastDates: {
+      type: Boolean,
+      value: false
+    },
+    /**
+     * The minimum / earliest allowed date, as an ISO 8601 String or a Moment object (dates before this will be disabled and unclickable).
+     */
+    min: {
+      type: Object,
+      value: function() {
+        return {};
+      },
+      observer: '_minChanged'
+    },
+    /**
+     * The maximum / latest allowed date, as an ISO 8601 String or a Moment object (dates after this will be disabled and unclickable).
+     */
+    max: {
+      type: Object,
+      value: function() {
+        return {};
+      },
+      observer: '_maxChanged'
+    }
+  },
+  _minChanged: function() {
+    if(typeof this.min === 'string') {
+      this.min = Px.moment(this.min);
+    }
+  },
+  _maxChanged: function() {
+    if(typeof this.max === 'string') {
+      this.max = Px.moment(this.max);
+    }
+  }
+}
+
+/**
+  ```pxDatetimeSharedBehavior```
+
+  This behavior is for all ```px-datetime``` components.
+
+  Dependencies: momentjs
+
+  @polymerBehavior pxDatetimeSharedBehavior
+*/
+
+var pxDatetimeSharedBehavior = [{
+
+  properties: {
+
+    /**
+     * Moment-timezone string for using a specific timezone. See
+     * http://momentjs.com/timezone/docs/#/data-loading/getting-zone-names/.
+     *
+     * If not provided, tries to guess the current local timezone.
+     *
+     * @default Px.moment.tz.guess();
+     */
+    timeZone: {
+      type: String,
+      notify: true,
+      value: function() {
+        return Px.moment.tz.guess();
+      }
+     },
+     /**
+      * set a default for localizing
+      */
+     language: {
+       type: String,
+       value: 'en'
+     },
+     /**
+      * Use the key for localization if value for  language is missing. Should
+      * always be true for  our components
+      */
+     useKeyIfMissing: {
+       type: Boolean,
+       value: true
+     }
+  },
+  /**
+  * Takes an ISO 8601 String and returns a moment object.
+  *
+  * @param {String} timeString
+  */
+  _convertISOtoMoment: function(timeString) {
+    return Px.moment.tz(Px.moment(timeString, Px.moment.ISO_8601), this.timeZone);
+  },
+  /**
+   * Copies the time in toPreserve to dest and returns dest.
+   * used in `px-calendar-picker`, `px-datetime-picker`, and `px-datetime-range-panel`
+   *
+   * @param {} toPreserve
+   * @param {} dest
+   */
+  _preserveTime: function(toPreserve, dest) {
+    if(toPreserve && dest) {
+      dest.hours(toPreserve.hours());
+      dest.minutes(toPreserve.minutes());
+      dest.seconds(toPreserve.seconds());
+      dest.milliseconds(toPreserve.milliseconds());
+    }
+    return dest;
+  },
+  /**
+   * Applies the current moment values to the external facing strings or rollback
+   * the current moment values to the external facing strings
+   */
+  _applyCurrentValues: function(doApply) {
+    if(doApply){
+      this._applyMomentToString();
+    } else {
+      this._rollbackMomentFromString();
+    }
+  }
+}, Polymer.IronA11yKeysBehavior, PxDatetimeBehavior.blockDates, Polymer.AppLocalizeBehavior];
+
+
+</script>

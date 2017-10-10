@@ -1,0 +1,199 @@
+<!--
+This element defines column settings for a column within a `px-data-table`. If no `px-data-table-column` sub-components are passed in,
+by default the table will display all columns that are found in the `table-data` array objects. If one or more column definitions are
+included, the table will only display those columns. If the `include-all-columns` property is set to true on the `px-data-table`,
+the table will first gather all of the columns from the `table-data` array, then override the settings for individual columns using
+the `px-data-table-column` definitions provided.
+
+### Usage
+
+    <px-data-table-column name="first"></px-data-table-column>
+
+The px-data-table-column component accepts both px-validation and px-data-table-highlight sub-components. For example:
+
+    <px-data-table table-data="{{...}}">
+      <px-data-table-column name="first" label="First Name" filterable sortable editable>
+        <px-validation>
+          <px-validator validation-method="isNumber" import="../px-validation/px-example-validator.html"></px-validator>
+        </px-validation>
+      </px-data-table-column>
+    </px-data-table>
+
+    <px-data-table table-data="{{...}}">
+      <px-data-table-column name="first" label="First Name" filterable sortable editable>
+        <px-data-table-highlight highlight-method="wordBeginsWithLetterJ" import="px-example-highlight.html">
+        </px-data-table-highlight>
+      </px-data-table-column>
+    </px-data-table>
+
+Use the dropdown at the top of this screen to see the API for `px-data-table` or `px-data-table-highlight`.
+Click [here](https://www.predix-ui.com/#/components/px-validation/) for more information on `px-validation`.
+
+@element px-data-table-column
+@homepage index.html
+@demo index.html
+-->
+<dom-module id="px-data-table-column">
+  <template>
+    <content id="contentNode"></content>
+  </template>
+</dom-module>
+
+<script>
+  Polymer({
+    is: "px-data-table-column",
+    properties: {
+
+      /**
+       * Name of the column. **Note:** must match the column name defined in the table-data property of parent px-data-table.
+       */
+      name: {
+        type: String,
+        value: ""
+      },
+
+      /**
+       * Label to display in the table heading for this column.  If no label is provided, a title-cased version of the name property will be used by default.
+       */
+      label: {
+        type: String,
+        value: ""
+      },
+
+      /**
+       * Type of data in the column. Should be one of: string, html, dropdown. Strings will appear literally, whereas HTML content will be rendered.
+       * Dropdowns allow users to pick from a provided set of options (see `dropdownItems`).
+       *
+       * **WARNING!** Potential XSS vulnerability if `html` comes from an untrusted source
+       */
+      type: {
+        type: String,
+        value: "string"
+      },
+
+      /**
+       * If true, users can click on the column heading to sort table rows in a certain order (by default, alphabetically).
+       * For custom sorting, see `sortFunctionName` property.
+       * **Note:** parent component px-data-table must also have this property set to true.
+       */
+      sortable: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * If true, users can click on a data table cell in this column and edit the contents.
+       */
+      editable: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * If true, a filter input will appear under the column heading which allows the user to filter the table contents.
+       * For custom filtering, see `filterFunctionName` property.
+       * **Note:** parent component px-data-table must also have this property set to true.
+       */
+      filterable: {
+        type: Boolean,
+        value: false,
+        notify: true
+      },
+
+      /**
+       * Full path to the custom function (attached to `window`) to sort this row with.
+       * We highly suggest namespacing this function name so you don't pollute the global namespace and so you can have multiple datatables with different sorting functions.
+       *
+       *      <px-data-table-column sort-function-name="temperatureTable.sortByDate" ...></px-data-table-column>
+       *
+       */
+      sortFunctionName: {
+        type: String,
+        value: ""
+      },
+
+      /**
+       * Full path to the custom function (attached to `window`) to filter this row with.
+       * We highly suggest namespacing this function name so you don't pollute the global namespace and so you can have multiple datatables with different filtering functions.
+       *
+       *      <px-data-table-column filter-function-name="pressureTable.filterByNumber" ...></px-data-table-column>
+       */
+      filterFunctionName: {
+        type: String,
+        value: ""
+      },
+
+      /**
+       * Maximum number of characters to display in the column. Can be used in conjunction with `ellipsisClipPosition` property.
+       * By defaul, the table will make the column as wide as necessary to display all of its content.
+       */
+      maxColumnCharacterWidth: {
+        type: Number,
+        value: 0
+      },
+
+      /**
+       * In conjunction with `maxColumnCharacterWidth`, this property dictates where to clip the data and put the ellipsis.
+       * Should be one of: center, left, right.
+       */
+      ellipsisClipPosition: {
+        type: String,
+        value: "right"
+      },
+      /**
+       * For columns of `type` "dropdown", this property dictates which options should be available in the dropdown.
+       */
+      dropdownItems:{
+        type: Array,
+        value: function() {return [];},
+        notify: true
+      },
+      /**
+       * Whether the column should be hidden from view.
+       */
+      hide: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Whether the column should show up in the column chooser or not.
+       */
+      disableHide: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Placeholder text for input boxes if this column is editable.
+       */
+      placeholder: {
+        type: String,
+        value: ''
+      },
+      _highLightElLoadedCount: {
+        type: Number,
+        value: 0
+      }
+    },
+    /**
+     * This method is used by `px-validation` sub-components to verify that editable cells follow a specific validation pattern.
+     * If no validation/validator sub-components are specified, editable cells will always pass validation. Example usage:
+     * ```
+     * <px-data-table-column ...>
+     *    <px-validation>
+     *      <px-validator validation-method="isNumber" import="../px-validation/px-example-validator.html"></px-validator>
+     *    </px-validation>
+     * </px-data-table-column>
+     * ```
+     */
+    validate: function(value){
+      var validationEl = Polymer.dom(this).querySelector('px-validation');
+      if(validationEl){
+        return validationEl.validate(value);
+      }
+      else{
+        // no validation specified - always return 'passedValidation : true'
+        return {passedValidation: true};
+      }
+    }
+  });
+</script>

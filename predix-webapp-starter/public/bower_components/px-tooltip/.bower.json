@@ -1,0 +1,52 @@
+{
+  "name": "px-tooltip",
+  "version": "1.0.5",
+  "main": [
+    "px-tooltip.html"
+  ],
+  "ignore": [
+    "*.enc",
+    ".*",
+    "node_modules",
+    "bower_components",
+    "sass",
+    "HISTORY.md",
+    "CONTRIBUTING.md",
+    "OSS_Notice.pdf",
+    "scripts",
+    ".github",
+    ".editorconfig",
+    ".jshintrc",
+    ".gitignore",
+    "LICENSE.md",
+    "gulpfile.js",
+    "monogram-wdmk.png",
+    "README.md",
+    "wct.conf.json",
+    "px-tooltip.png"
+  ],
+  "dependencies": {
+    "iron-resizable-behavior": "^2.0.0",
+    "polymer": "^1.9.0"
+  },
+  "devDependencies": {
+    "px-normalize-design": "^1.0.0",
+    "px-box-sizing-design": "^1.0.0",
+    "px-helpers-design": "^1.0.0",
+    "px-demo": "^2.0.0",
+    "px-theme": "^3.0.0"
+  },
+  "resolutions": {
+    "webcomponentsjs": "^0.7.24"
+  },
+  "homepage": "https://github.com/PredixDev/px-tooltip",
+  "_release": "1.0.5",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.0.5",
+    "commit": "f4abb3e948a55823496e7f0cb530791a094651ce"
+  },
+  "_source": "https://github.com/PredixDev/px-tooltip.git",
+  "_target": "^1.0.0",
+  "_originalSource": "px-tooltip"
+}

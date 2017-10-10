@@ -1,0 +1,49 @@
+<!-- import polymer -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- import dependent comonents -->
+<!--<link rel="import" href="kpi-datapoint.html">-->
+<link rel="import" href="../../bower_components/px-key-value-pair/px-key-value-pair.html">
+<!--<link rel="import" href="../../bower_components/px-percent-circle/px-percent-circle.html">-->
+<link rel="import" href="kpi-bar-meter.html">
+
+<!-- import page level css -->
+<link rel="import" href="kpi-bar-styles.html">
+
+<dom-module id='kpi-bar'>
+  <template>
+    <style include="kpi-bar-styles"></style>
+    
+    <div class="flex flex--row u-pl++ kpi-bar-wrapper">      
+      <template id="kpiDatapoints" is="dom-repeat" items="[[datapoints]]">
+        <div class="flex__item">
+          <px-key-value-pair size="gamma" value="[[item.value]]" key="[[item.label]]" uom="[[item.uom]]"></px-key-value-pair>
+        </div>
+      </template>
+      <div class="flex__item">
+        <div class="flex flex--row">
+        <px-key-value-pair size="gamma" value="[[overallValue]]" key="[[overallLabel]]" uom="[[overallUom]]"></px-key-value-pair>
+        <div class="u-pl++" style="margin-top: 20px">
+          <kpi-bar-meter id="kpiBarMeter" label="[[overallLabel]]" percentage="[[overallValue]]"></kpi-bar-meter>
+        </div>
+      </div>
+    <div>
+  </template>
+  <script>
+  Polymer({
+    is: 'kpi-bar',
+    properties: {
+      datapoints: [],
+      overallLabel: '',
+      overallValue: {
+        observer: '_overallValueChanged'
+      },
+      overallUom: ''
+    },
+    _overallValueChanged: function(newVal){
+      // don't show the percent sign until we have data.
+      this.overallUom = '%';
+    }
+  });
+  </script>
+</dom-module>
