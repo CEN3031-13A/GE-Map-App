@@ -1,0 +1,302 @@
+<link rel="import" href="../polymer/polymer.html"/>
+<link rel="import" href="../px-datetime-common/px-datetime-range-behavior.html"/>
+<link rel="import" href="../px-datetime-common/px-datetime-button-behavior.html"/>
+<link rel="import" href="../px-datetime-range-field/px-datetime-range-field.html"/>
+<link rel="import" href="../px-datetime-range-panel/px-datetime-range-panel.html"/>
+<link rel="import" href="css/px-rangepicker-styles.html"/>
+
+<!--
+#### Usage
+
+    <px-rangepicker
+      range='{"from":"2016-01-01T00:00:00.000Z","to":"2016-07-01T11:00:00.000Z"}'>
+    </px-rangepicker>
+
+#### Styling
+The following custom property is available for styling. Please also refer to px-forms-design, px-datetime-range-field, and px-datetime-range-panel for additional style variables used by this component.
+
+Custom property | Description
+:----------------|:-------------
+`px-datetime` components | the css variables are defined in the other `px-datetime` components
+
+@element px-rangepicker
+@blurb Element allowing to choose a date (and time) range
+@homepage index.html
+@demo index.html
+-->
+<dom-module id="px-rangepicker">
+  <template>
+    <style include="px-rangepicker-styles"></style>
+
+    <div id="overlay" class="overlay visuallyhidden" on-tap="_processClose"></div>
+    <px-datetime-range-field
+      id="field"
+      from-moment="{{fromMoment}}"
+      to-moment="{{toMoment}}"
+      time-zone="{{timeZone}}"
+      date-format="{{dateFormat}}"
+      time-format="{{timeFormat}}"
+      hide-time="{{hideTime}}"
+      block-future-dates="{{blockFutureDates}}"
+      block-past-dates="{{blockPastDates}}"
+      is-valid="{{isValid}}"
+      hide-validation-messages="{{hideValidationMessages}}"
+      show-time-zone="[[showTimeZone]]"
+      prevent-notification-on-change
+      resources="[[resources]]"
+      language="[[language]]"
+      formats="[[formats]]"
+      allow-wrap="[[allowWrap]]"
+      min="[[min]]"
+      max="[[max]]">
+    </px-datetime-range-field>
+    <px-datetime-range-panel
+      id="panel"
+      class="visuallyhidden absolute u-mt+"
+      from-moment="{{fromMoment}}"
+      to-moment="{{toMoment}}"
+      time-format="{{timeFormat}}"
+      hide-time="{{hideTime}}"
+      hide-presets="{{hidePresets}}"
+      show-buttons="{{showButtons}}"
+      block-future-dates="{{blockFutureDates}}"
+      block-past-dates="{{blockPastDates}}"
+      preset-ranges="{{presetRanges}}"
+      time-zone="[[timeZone]]"
+      day-week-start-index="[[dayWeekStartIndex]]"
+      resources="[[resources]]"
+      language="[[language]]"
+      formats="[[formats]]"
+      min="[[min]]"
+      max="[[max]]">
+    </px-datetime-range-panel>
+  </template>
+</dom-module>
+
+<script>
+  Polymer({
+
+    is: 'px-rangepicker',
+    behaviors: [
+      pxDatetimeRangeBehavior,
+      pxDatetimeButtonBehavior
+    ],
+
+    properties: {
+      /**
+       * Whether the panel is opened
+       */
+      _opened: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Moment format used to format the date
+       *
+       */
+      dateFormat: {
+        type: String,
+        value: 'MM/DD/YYYY'
+      },
+      /**
+       * Moment format used to format the time
+       *
+       */
+       timeFormat: {
+        type: String,
+        value: 'HH:mm A'
+      },
+      /**
+       * Whether to allow time selection as well in this date picker
+       *
+       */
+      hideTime: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Whether to show the preset date/time ranges
+       *
+       */
+      hidePresets: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Whether to allow the range field to wrap at smaller screen resolutions / parent container sizes.
+       *
+       */
+      allowWrap: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Whether the currently selected date is valid
+       */
+      isValid: {
+        type: Boolean,
+        notify: true,
+        value: true
+      },
+      /**
+       * Hides the validation messages if set to true
+       */
+      hideValidationMessages: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       *
+       * Timezone display format
+       * - 'dropdown': shows the timezone as a dropdown with which the user can select a different timezone. Contains only a subset of all timezones.
+       * - 'extendedDropdown': shows the timezone as a dropdown with which user can select a different timezone. Contains all existing timezones (588 total).
+       * - 'text': shows the timezone as text, non-editable.
+       * - 'abbreviatedText': shows the timezone as abbreviated text, non-editable (e.g. UTC, PST, EST).
+       */
+      showTimeZone: {
+        type: String,
+        value: ''
+      },
+      /**
+       * (optional)
+       *
+       * The preset date/time ranges to be displayed.
+       *
+       *```
+       *   [
+       *    {
+       *      "displayText": "Last 5 Minutes",
+       *      "startDateTime": "2013-02-04T22:44:30.652Z",
+       *      "endDateTime": "2013-02-04T22:49:30.652Z"
+       *    },
+       *    {
+       *      "displayText": "Last 12 Hours",
+       *      "startDateTime": "2013-02-04T10:44:30.652Z",
+       *      "endDateTime": "2013-02-04T22:49:30.652Z"
+       *    }
+       *   ]
+       * ```
+       *
+       * @default Last 7 Days + This Month + Last Month
+       */
+      presetRanges: {
+        type: Object,
+        value: function() {
+          var now = Px.moment();
+          return [
+            {
+              "displayText": "Last 7 Days",
+              "startDateTime": now.clone().subtract(7, 'days'),
+              "endDateTime": now
+            },
+            {
+              "displayText": "This Month",
+              "startDateTime": now.clone().startOf('month'),
+              "endDateTime": now.clone().endOf('month')
+            },
+            {
+              "displayText": "Last Month",
+              "startDateTime": now.clone().subtract(1, 'months').startOf('month'),
+              "endDateTime": now.clone().subtract(1, 'months').endOf('month')
+            }
+          ]
+        }
+      }
+    },
+    listeners: {
+      'px-datetime-entry-icon-clicked':'_toggleBoxOpen',
+      'px-datetime-button-clicked': '_buttonClicked',
+      'tap' : '_handleTap'
+    },
+    observers: [
+      '_momentChanged(fromMoment, toMoment)'
+    ],
+    /**
+     * Key bindings for iron-a11y-keys-behavior
+     */
+    keyBindings: {
+      'esc' : '_onEsc',
+      'enter': '_onEnter'
+    },
+
+    _onEsc: function(evt) {
+      if(this._opened) {
+        this._close();
+      }
+    },
+
+    _onEnter: function(evt) {
+      if(this._opened) {
+        this._applyCurrentValues(this.$.field.isValid);
+        this._close();
+      }
+    },
+    /**
+     * Opens the calendar
+     */
+    _open: function() {
+      this.toggleClass('visuallyhidden', false, this.$.panel);
+      this.toggleClass('visuallyhidden', false, this.$.overlay);
+      this.toggleClass('aboveOverlay', true, this.$.field);
+
+      this.set('_opened', true);
+    },
+    /**
+     * Closes the calendar
+     */
+    _close: function() {
+      this.toggleClass('visuallyhidden', true, this.$.panel);
+      this.toggleClass('visuallyhidden', true, this.$.overlay);
+      this.toggleClass('aboveOverlay', false, this.$.field);
+
+      this.set('_opened', false);
+    },
+    /**
+     * Opens the calendar if closed, closes it if opened
+     */
+    _toggleBoxOpen: function() {
+      if(this._opened) {
+        this._close();
+      } else {
+        this._open();
+      }
+    },
+
+    _processClose: function() {
+      //If we show time make sure it is valid on closing. If we show buttons don't validate
+      var canApplyValues = !this.showButtons && this.$.panel.timeIsValid && this.$.field.isValid;
+      this._applyCurrentValues(canApplyValues);
+      this._close();
+    },
+
+    _momentChanged: function(momentObj) {
+      //we're closed, moment has changed by user changing the input fields.
+      if(!this._opened && this.$.field.isValid && this.$.panel.timeIsValid) {
+        this._applyCurrentValues(true);
+      }
+    },
+
+    _buttonClicked: function(evt) {
+      this._applyCurrentValues(evt.detail.action && this.$.field.isValid && this.$.panel.timeIsValid);
+      this._close();
+    },
+
+    /**
+     * If the calendar is open and the dropdown is selected, close the calendar
+     */
+    _handleTap: function(evt) {
+      if(this._opened === true){
+
+        var path = Polymer.dom(evt).path;
+
+        for (var i=0; i<path.length; i++) {
+          if (path[i].nodeName === 'PX-DROPDOWN') {
+            this._close();
+            return;
+          }
+        }
+
+      }
+    }
+  });
+</script>

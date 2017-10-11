@@ -1,0 +1,274 @@
+<link rel="import" href="../polymer/polymer.html"/>
+<link rel="import" href="../px-icon-set/px-icon-set.html"/>
+<link rel="import" href="../px-icon-set/px-icon.html"/>
+<link rel="import" href="css/px-card-styles.html"/>
+
+<!--
+
+### Usage
+Cards can be used directly in a page or application as shown below.
+Content included in a block with class `actions` will be rendered
+in the top right corner of the card header.
+```
+<px-card header-text="Card" icon="analysis">
+  <div class='actions'>
+    <px-icon icon="pxm:new-window"></px-icon>
+    <px-icon icon="pxs:help"></px-icon>
+    <px-icon icon="pxs:app-settings"></px-icon>
+  </div>
+  <p>This is the main content area of a Predix card.</p>
+</px-card>
+```
+
+Alternatively, you could create your own Polymer components that instantiate different styles of cards,
+and use them in combination with the Predix Views service and the px-deck / px-dashboard sub-components
+of this repo. **Be sure to use the dropdown at the top of this screen to view details about the px-card behavior,
+as well as the px-deck and px-dashboard subcomponents.**
+
+### Styling
+The following custom properties are available for styling:
+
+Custom property | Description
+----------------|-------------
+`--px-card-background-color` | Background color of the card
+`--px-card-border-color` | Border color for the top of the card
+`--px-card-header-color` | Color of the header text
+`--px-card-icon-color` | Color of the card's main icon'
+`--px-card-action-icon-color` | Color of icons in actions slot
+`--px-card-action-icon-color--hover` | Color of icons in actions slot when hovered
+`--px-card-action-icon-color--pressed` | Color of icons in actions slot when pressed
+
+
+@element px-card
+@blurb Element containing basic styling and behaviors (API) for card
+@demo demo.html
+@homepage index.html
+-->
+<dom-module id="px-card">
+  <template>
+    <style include="px-card-styles"></style>
+
+    <template is="dom-if" if="{{headerText}}">
+      <header class="flex flex--middle flex--justify">
+        <div class="epsilon caps" id="headerText">
+          <template is="dom-if" if="{{icon}}">
+            <px-icon id="headericon" icon="{{icon}}"></px-icon>
+          </template>{{headerText}}
+        </div>
+        <content select=".actions"></content>
+      </header>
+    </template>
+    <div class="contents">
+      <content></content>
+    </div>
+  </template>
+</dom-module>
+
+<script type="text/javascript">
+  (function() {
+  window.px = window.px || {};
+
+  /**
+    @polymerBehavior px.card
+  */
+
+  window.px.card = {
+    properties: {
+      /**
+       * Title of your card
+       */
+      title: {
+        type: String,
+        reflectToAttributes: true
+      },
+      /**
+       * Context object being pass into the card from deck/dashboard
+       */
+      context: {
+        type: Object,
+        observer: '_contextChanged'
+      },
+      /**
+       * Card url in view service card persistence
+       */
+      url: {
+        type: String
+      },
+      /**
+       * Deck state object being pass from the deck, deck state object is a shared object between all cards within a deck
+       */
+      deckState: {
+        type: Object,
+        observer: '_deckStateChanged'
+      }
+    },
+    /**
+     * Context change handler to be called when context is changed.
+     * This private method will call public contextChanged method which will be implemented by developer
+     */
+    _contextChanged: function(newContext, oldContext) {
+      if (this.contextChanged && typeof this.contextChanged === 'function' && this.isInit === true) {
+        this.contextChanged(newContext, oldContext);
+      }
+    },
+    /**
+     * Deck state change handler to be called when deck state is changed in deck by other cards.
+     * This private method will call public deckStateChanged method which will be implemented by developer
+     */
+    _deckStateChanged: function(newDealerState, oldDealerState) {
+    this.fromDeck = true;
+      if (this.deckStateChanged && typeof this.deckStateChanged === 'function') {
+        this.deckStateChanged(newDealerState, oldDealerState);
+      }
+      this.fromDeck = false;
+    },
+    _refresh: function() {
+      if (this.refresh && typeof this.refresh === 'function') {
+        this.refresh();
+      }
+    },
+    ready: function() {
+      this.addEventListener('px-card-refresh', this._refresh);
+    },
+    attached: function() {
+      this.isInit = false;
+      this.fire('px-card-ready');
+      if (!this.id) {
+        throw 'Card ' + this.tagName + ' cannot be created without an id!';
+      }
+    },
+    /**
+     * Init method to be called when card is ready
+     */
+    init: function() {
+      // this default init function is needed in case they don't implement init
+      // this is the 'instantiate' requirement
+    },
+    /**
+     * Call this method with an object that the card wants to share with other cards within the deck. Example:
+     *
+     *        this.updateDeck( {count: this.count} );
+     */
+    updateDeck: function(value) {
+      if (!this.fromDeck) {
+        if (this._deck && this._deck.updateState) {
+          this._deck.updateState(this.id, value);
+        } else {
+        }
+      } else {
+      }
+    },
+    /**
+     * This method can be called to show a card in the DOM
+     */
+    showCard: function() {
+      this.hidden = false;
+      this.querySelector('px-card').hidden = false;
+    },
+    /**
+     * This method can be called to hide a card from the DOM
+     */
+    hideCard: function() {
+      this.hidden = true;
+      this.querySelector('px-card').hidden = true;
+    },
+    /**
+     * Get data from web resources with url. See examples above.
+     */
+    getData: function() {
+      return window.px.dealer.getData.apply(window.px.dealer, arguments);
+    },
+    /**
+     * Get all properties of a card and return an object of element attribute names and values.
+     * Each card property name will be converted from camel case property name to lowercase words separated by dashes
+     */
+    getCardAttributes: function() {
+      var cardState = {},
+        cardElement = document.querySelector(this.nodeName),
+        cardBehaviors = cardElement.behaviors;
+
+      cardBehaviors.forEach(function(behavior) {
+        for (var prop in behavior.properties) {
+        cardState[window.px.slugify(prop)] = cardElement[prop];
+        }
+      });
+
+      for (var prop in cardElement.properties) {
+        cardState[window.px.slugify(prop)] = cardElement[prop];
+      }
+
+      return cardState;
+    },
+    /**
+     * Save card in view service when a card url is provided.
+     * If you render a deck and card using px-dashboard with view-service-base-url
+     * attribute set, card url will be set by the px-dashboard component behind the scenes
+     */
+    save: function() {
+      var state = this.getCardAttributes(),
+        url = this.url;
+
+      if (url) {
+        var serializedCard = {};
+
+        if (state.title) {
+          serializedCard.title = state.title;
+          delete state.title;
+        }
+
+        if (state.url) {
+          delete state.url;
+        }
+
+        delete state.id;
+
+        serializedCard.attributes = state;
+
+        return window.px.dealer.httpRequest({
+          method: 'PUT',
+          url: url,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          data: serializedCard
+        });
+      } else {
+        throw 'Card url is undefined';
+      }
+    }
+  };
+  })();
+
+  Polymer({
+    is: 'px-card',
+    properties: {
+      /**
+       * Text to be displayed in the header of the card.
+       * Note: if you do not specify a value for this property,
+       * the entire header area (including icon and actions slot)
+       * will not be shown. Pass a blank space (e.g. ' ')
+       * if you need the icon/actions but not the title.
+       */
+      headerText: {
+        type: String
+      },
+      /**
+       * Icon that appears to the left of the card header text.
+       * Should be a valid icon name from the Predix icon set.
+       */
+      icon: {
+        type: String
+      },
+      /**
+       * When set to true, the contents of the card will stretch
+       * from edge-to-edge, with no padding on the sides. Should only
+       * be used for displaying graphics like images or maps within a card.
+       */
+      fullBleed: {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true
+      }
+    }
+  });
+</script>

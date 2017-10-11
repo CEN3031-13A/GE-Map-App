@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Predix UI</title>
+    <script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
+
+    <link rel="import" href="../../polymer/polymer.html" />
+    <link rel="import" href="../../px-theme/px-theme-styles.html">
+    <style include="px-theme-styles" is="custom-style"></style>
+
+    <link rel="import" href="../px-calendar-picker.html" />
+
+  </head>
+
+  <body>
+    <h2>px-calendar-picker</h2>
+    <div style="width:210px;">
+      <px-calendar-picker
+        display-mode="day">
+      </px-calendar-picker>
+      <px-calendar-picker
+        display-mode="day"
+        prevent-range-selection>
+      </px-calendar-picker>
+    </div>
+  </body>
+</html>
+

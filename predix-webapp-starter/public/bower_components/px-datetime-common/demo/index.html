@@ -1,0 +1,177 @@
+<!-- Common imports -->
+<link rel="import" href="../../polymer/polymer.html" />
+
+<!-- Common demo imports -->
+<link rel="import" href="../../px-demo/px-demo-header.html" />
+<link rel="import" href="../../px-demo/px-demo-api-viewer.html" />
+<link rel="import" href="../../px-demo/px-demo-footer.html" />
+<link rel="import" href="../../px-demo/px-demo-configs.html" />
+<link rel="import" href="../../px-demo/px-demo-props.html" />
+<link rel="import" href="../../px-demo/px-demo-interactive.html" />
+<link rel="import" href="../../px-demo/px-demo-component-snippet.html" />
+<link rel="import" href="../../px-demo/px-demo-code-editor.html" />
+
+<!-- Imports for this component -->
+<link rel="import" href="../../px-demo/css/px-demo-styles.html" />
+<link rel="import" href="../px-datetime-entry.html"/>
+
+<!-- Demo DOM module -->
+<dom-module id="local-element-demo">
+  <template>
+    <style include="px-demo-styles" is="custom-style"></style>
+
+    <!-- Header -->
+    <px-demo-header
+        module-name="px-datetime-common"
+        description="The base component for all the `px-datetime` and `px-rangepicker` components. It holds the functionality for the entry, buttons, presets, and behaviors">
+    </px-demo-header>
+
+    <!-- Interactive -->
+    <px-demo-interactive>
+      <!-- Configs -->
+      <px-demo-configs configs="[[configs]]" props="{{props}}" chosen-config="{{chosenConfig}}"></px-demo-configs>
+
+      <!-- Props -->
+      <px-demo-props props="{{props}}" config="[[chosenConfig]]"></px-demo-props>
+
+      <px-demo-code-editor props="{{props}}" config="[[chosenConfig]]"></px-demo-code-editor>
+
+      <!-- Component ---------------------------------------------------------->
+      <px-demo-component>
+        <p class=u-mb0>Event fired: <strong>px-datetime-submitted</strong></p>
+        <p class="zeta u-mt0">See API Reference below for more details</p>
+        <p class="u-mb++">Current dateTime object: <strong>{{props.dateTime.value}}</strong></p>
+
+        <px-datetime-entry
+            block-future-dates="{{props.blockFutureDates.value}}"
+            block-past-dates="{{props.blockPastDates.value}}"
+            hide-icon="{{props.hideIcon.value}}"
+            date-or-time="{{props.dateOrTime.value}}"
+            show-time-zone="{{props.showTimeZone.value}}"
+            time-zone="{{props.timeZone.value}}"
+            moment-format="{{props.momentFormat.value}}"
+            min="{{props.min.value}}"
+            max="{{props.max.value}}">
+        </px-datetime-entry>
+      </px-demo-component>
+      <!-- END Component ------------------------------------------------------>
+
+      <px-demo-component-snippet
+          element-properties="{{props}}"
+          element-name="px-datetime-common">
+      </px-demo-component-snippet>
+    </px-demo-interactive>
+
+    <!-- API Viewer -->
+    <px-demo-api-viewer source="px-datetime-entry"></px-demo-api-viewer>
+
+    <!-- Footer -->
+    <px-demo-footer></px-demo-footer>
+
+  </template>
+
+</dom-module>
+<script>
+  Polymer({
+    is: 'local-element-demo',
+
+    properties: {
+
+      /**
+       * @property demoProps
+       * @type {Object}
+       */
+      props: {
+        type: Object,
+        value: function(){ return this.demoProps; }
+      },
+
+      /**
+       * @property demoProps
+       * @type {Array}
+       */
+      configs: {
+        type: Array,
+        value: function(){
+          return [
+            {
+              blockFutureDates:false,
+              blockPastDates:false,
+              hideIcon:false,
+              momentFormat:"MM/DD/YY",
+              dateOrTime:"date",
+              showTimeZone:"text",
+              timeZone: "UTC"
+            }
+          ]
+        }
+      }
+    },
+
+    /**
+     * A reference for `this.props`. Read the documentation there.
+     */
+    demoProps: {
+
+      blockFutureDates: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      blockPastDates: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      hideIcon: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      momentFormat: {
+        type: String,
+        defaultValue: 'MM/DD/YY',
+        inputType: 'text',
+        inputPlaceholder: 'YYYY/MM/DD'
+      },
+
+      dateOrTime: {
+        type: String,
+        defaultValue: 'date',
+        inputType: 'dropdown',
+        inputChoices: ['date', 'time']
+      },
+
+      showTimeZone: {
+        type: String,
+        defaultValue: 'text',
+        inputType: 'dropdown',
+        inputChoices: ['dropdown', 'extendedDropdown', 'text', 'abbreviatedText']
+      },
+
+      timeZone: {
+        type: String,
+        defaultValue: 'UTC',
+        inputType: 'text',
+        inputPlaceholder: 'UTC'
+      },
+
+      min: {
+        type: Object,
+        defaultValue: "2017-08-14T21:59:48.672Z",
+        inputType: 'code:JSON'
+      },
+
+      max: {
+        type: Object,
+        defaultValue: "2017-08-28T21:59:48.674Z",
+        inputType: 'code:JSON'
+      }
+
+    }
+
+  });
+</script>

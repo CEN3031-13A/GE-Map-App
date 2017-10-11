@@ -1,0 +1,53 @@
+{
+  "name": "px-app-nav",
+  "description": "A navigation component that allows the user to browse app pages and content",
+  "version": "2.0.9",
+  "main": [
+    "px-app-nav.html"
+  ],
+  "ignore": [
+    "*.enc",
+    ".*",
+    "npm-debug.log",
+    "gulpfile.js",
+    "sass",
+    "bower_components",
+    "node_modules",
+    "test",
+    "OSS_Notice.pdf",
+    "scripts",
+    ".github",
+    "px-app-nav.png",
+    "polymer.json"
+  ],
+  "dependencies": {
+    "polymer": "^1.9.0",
+    "px-icon-set": "^2.0.0",
+    "neon-animation": "^2.0.0",
+    "iron-dropdown": "^2.0.0",
+    "iron-resizable-behavior": "^2.0.0",
+    "web-animations-js": "^2.2.0",
+    "px-app-helpers": "^1.0.1"
+  },
+  "devDependencies": {
+    "px-box-sizing-design": "^1.0.0",
+    "px-colors-design": "^1.0.0",
+    "px-defaults-design": "^2.0.0",
+    "px-demo": "^2.0.0",
+    "px-shadows-design": "^1.0.0",
+    "web-component-tester": "^6.0.0"
+  },
+  "resolutions": {
+    "webcomponentsjs": "^0.7.24"
+  },
+  "homepage": "https://github.com/PredixDev/px-app-nav",
+  "_release": "2.0.9",
+  "_resolution": {
+    "type": "version",
+    "tag": "v2.0.9",
+    "commit": "d72b3a8d85726787f110b2888296719901f6f872"
+  },
+  "_source": "https://github.com/PredixDev/px-app-nav.git",
+  "_target": "^2.0.9",
+  "_originalSource": "px-app-nav"
+}

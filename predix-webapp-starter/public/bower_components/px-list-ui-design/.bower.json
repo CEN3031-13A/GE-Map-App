@@ -1,0 +1,54 @@
+{
+  "name": "px-list-ui-design",
+  "version": "2.0.2",
+  "authors": [
+    "General Electric",
+    "Harry Roberts <harry@csswizardry.com>"
+  ],
+  "description": "A simple, keyline-delimited blocky list object for Predix UI",
+  "main": "_objects.list-ui.scss",
+  "keywords": [
+    "px",
+    "sass",
+    "list-ui"
+  ],
+  "homepage": "https://github.com/PredixDev/px-list-ui-design.git",
+  "private": false,
+  "ignore": [
+    "*.enc",
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "sass",
+    "*.md",
+    "scripts",
+    "github",
+    "gulpfile.js",
+    "monogram-wdmk.png",
+    "wct.conf.json",
+    "test",
+    "OSS_Notice.pdf",
+    "*.png"
+  ],
+  "dependencies": {
+    "px-colors-design": "^1.0.0",
+    "px-defaults-design": "^2.0.0"
+  },
+  "devDependencies": {
+    "px-starter-kit-design": "^1.0.0",
+    "px-sass-doc": "^1.0.0",
+    "px-demo": "^2.2.0"
+  },
+  "resolutions": {
+    "webcomponentsjs": "^0.7.24"
+  },
+  "_release": "2.0.2",
+  "_resolution": {
+    "type": "version",
+    "tag": "v2.0.2",
+    "commit": "af8dd4656db8f4a77e7952969c031ded3c67cac4"
+  },
+  "_source": "https://github.com/predixDev/px-list-ui-design.git",
+  "_target": "^2.0.0",
+  "_originalSource": "px-list-ui-design"
+}

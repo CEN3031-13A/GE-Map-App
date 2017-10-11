@@ -1,0 +1,119 @@
+<!-- Common imports -->
+<link rel="import" href="../../polymer/polymer.html" />
+<link rel="import" href="../../px-icon-set/px-icon-set.html" />
+
+<!-- Common demo imports -->
+<link rel="import" href="../../px-demo/px-demo-header.html" />
+<link rel="import" href="../../px-demo/px-demo-api-viewer.html" />
+<link rel="import" href="../../px-demo/px-demo-footer.html" />
+<link rel="import" href="../../px-demo/px-demo-configs.html" />
+<link rel="import" href="../../px-demo/px-demo-props.html" />
+<link rel="import" href="../../px-demo/px-demo-interactive.html" />
+<link rel="import" href="../../px-demo/px-demo-component-snippet.html" />
+<link rel="import" href="../../px-demo/px-demo-code-editor.html" />
+
+<!-- Imports for this component -->
+<link rel="import" href="../../px-demo/css/px-demo-styles.html" />
+<link rel="import" href="../px-login.html" />
+
+<!-- Demo DOM module -->
+<dom-module id="px-login-demo">
+  <template>
+    <style include="px-demo-styles" is="custom-style"></style>
+
+    <!-- Header -->
+    <px-demo-header
+        module-name="px-login"
+        description="The px-login element provides a login/logout button that integrates nicely with Cloud Foundry's UAA.  (Note that Sign In does not work in this demo page.  You can set the User name property to simulate sign in here.)">
+    </px-demo-header>
+
+    <!-- Interactive -->
+    <px-demo-interactive>
+      <!-- Configs -->
+      <px-demo-configs configs="[[configs]]" props="{{props}}" chosen-config="{{chosenConfig}}"></px-demo-configs>
+
+      <!-- Props -->
+      <px-demo-props props="{{props}}" config="[[chosenConfig]]"></px-demo-props>
+
+      <!-- Code Editor -->
+      <px-demo-code-editor props="{{props}}"></px-demo-code-editor>
+
+      <!-- Component ---------------------------------------------------------->
+      <px-demo-component>
+        <px-login
+          user-name="{{props.userName.value}}"
+          popover-location="{{props.popoverLocation.value}}"
+          menu-items="{{props.menuItems.value}}"
+          login-url="#"
+          logout-url="#">
+        </px-login>
+      </px-demo-component>
+      <!-- END Component ------------------------------------------------------>
+
+      <px-demo-component-snippet
+          element-properties="{{props}}"
+          element-name="px-login">
+      </px-demo-component-snippet>
+    </px-demo-interactive>
+
+    <!-- API Viewer -->
+    <px-demo-api-viewer source="px-login" hide="{{hideLocalize}}"></px-demo-api-viewer>
+
+    <!-- Footer -->
+    <px-demo-footer></px-demo-footer>
+
+  </template>
+
+</dom-module>
+<script>
+  Polymer({
+    is: 'px-login-demo',
+
+    properties: {
+
+      props: {
+        type: Object,
+        value: function(){ return this.demoProps; }
+      },
+
+      configs: {
+        type: Array,
+        value: function(){
+          return [
+            { configName: "Default",
+              configReset: true }
+          ]
+        }
+      },
+
+      hideLocalize: {
+        type: Array,
+        value: function() {
+          return ['localize','useKeyIfMissing','formats','pathToResources','loadResources','bubbleEvent','app-localize-resources-error','app-localize-resources-loaded']
+        }
+      }
+    },
+
+    /**
+     * A reference for `this.props`. Read the documentation there.
+     */
+    demoProps: {
+      userName: {
+        type: String,
+        defaultValue: 'Sample User',
+        inputType: 'text'
+      },
+      popoverLocation: {
+        type: String,
+        defaultValue: 'bottom',
+        inputType: 'dropdown',
+        inputChoices: ['top', 'bottom', 'left', 'right']
+      },
+      menuItems: {
+        type: Array,
+        defaultValue: [{url: "#settings", label: "Settings"}, {url: "#account", label: "My Account"}],
+        inputType: "code:JSON"
+      }
+    }
+  });
+</script>

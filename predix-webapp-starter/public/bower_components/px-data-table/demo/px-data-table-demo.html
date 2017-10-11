@@ -1,0 +1,183 @@
+<!-- Common imports -->
+<link rel="import" href="../../polymer/polymer.html" />
+
+<!-- Common demo imports -->
+<link rel="import" href="../../px-demo/px-demo-header.html" />
+<link rel="import" href="../../px-demo/px-demo-api-viewer.html" />
+<link rel="import" href="../../px-demo/px-demo-footer.html" />
+<link rel="import" href="../../px-demo/px-demo-configs.html" />
+<link rel="import" href="../../px-demo/px-demo-props.html" />
+<link rel="import" href="../../px-demo/px-demo-interactive.html" />
+<link rel="import" href="../../px-demo/px-demo-component-snippet.html" />
+<link rel="import" href="../../px-demo/px-demo-code-editor.html" />
+
+<!-- Imports for this component -->
+<link rel="import" href="../../px-demo/css/px-demo-styles.html" />
+<link rel="import" href="../px-data-table.html" />
+
+<!-- Demo DOM module -->
+<dom-module id="px-data-table-demo">
+  <template>
+    <style include="px-demo-styles" is="custom-style"></style>
+
+    <!-- Header -->
+    <px-demo-header
+        module-name="px-data-table"
+        description="The Data Table component is useful for displaying tabular data, and provides more functionality than a simple table. Users can sort ascending or descending on each column, filter within columns using simple search, select one or more rows, and edit data in-line with input validation. Rows are automatically paginated, but the user can select the number of rows to display in a single page. Cell borders can be configured by the developer to show up horizontally, vertically, or both.">
+    </px-demo-header>
+
+    <!-- Interactive -->
+    <px-demo-interactive>
+      <!-- Configs -->
+      <px-demo-configs configs="[[configs]]" props="{{props}}" chosen-config="{{chosenConfig}}"></px-demo-configs>
+
+      <!-- Props -->
+      <px-demo-props props="{{props}}" config="[[chosenConfig]]"></px-demo-props>
+
+      <px-demo-code-editor props="{{props}}"></px-demo-code-editor>
+
+      <!-- Component ---------------------------------------------------------->
+      <px-demo-component>
+
+        <div>
+          <px-data-table
+              table-data="{{props.tableData.value}}"
+              striped="{{props.striped.value}}"
+              filterable="{{props.filterable.value}}"
+              sortable="{{props.sortable.value}}"
+              selectable="{{props.selectable.value}}"
+              single-select="{{props.singleSelect.value}}"
+              show-column-chooser="{{props.showColumnChooser.value}}"
+              hide-pagination-control="{{props.hidePaginationControl.value}}"
+              include-all-columns="{{props.includeAllColumns.value}}"
+              language="{{props.language.value}}">
+              <px-data-table-column name="first" placeholder="First Name" filterable sortable editable></px-data-table-column>
+          </px-data-table>
+        </div>
+      </px-demo-component>
+      <!-- END Component ------------------------------------------------------>
+
+      <px-demo-component-snippet
+          element-properties="{{props}}"
+          element-name="px-data-table">
+      </px-demo-component-snippet>
+    </px-demo-interactive>
+
+    <!-- API Viewer -->
+    <px-demo-api-viewer source="px-data-table" hide="{{hideLocalize}}"></px-demo-api-viewer>
+
+    <!-- Footer -->
+    <px-demo-footer></px-demo-footer>
+
+  </template>
+
+</dom-module>
+<script>
+  Polymer({
+    is: 'px-data-table-demo',
+
+    properties: {
+
+      props: {
+        type: Object,
+        value: function(){ return this.demoProps; }
+      },
+
+      configs: {
+        type: Array,
+        value: function(){
+          return [
+            { configName: "Simple",
+              configReset: true },
+
+            { configName: "Complex",
+              striped: true,
+              filterable: true,
+              sortable: true,
+              selectable: true,
+              singleSelect: true,
+              showColumnChooser: true,
+              hidePaginationControl: false,
+              includeAllColumns: true }
+          ]
+        }
+      },
+      hideLocalize: {
+      type: Array,
+      value: function() {
+          return ['localize','useKeyIfMissing','formats','pathToResources','loadResources','app-localize-resources-error','app-localize-resources-loaded']
+        }
+      }
+    },
+
+    demoProps: {
+      tableData: {
+        type: Object,
+        defaultValue: [{"first":"Valentine","last":"Meyer","email":"valentinemeyer@scentric.com"},{"first":"Silva","last":"Alexander","email":"silvaalexander@gmail.com"},{"first":"Hopkins","last":"Wong","email":"hopkinswong@hotmail.com"},{"first": "Joe","last": "Sherman","email": "joejoe@yahoo.com"},{"first": "Jane","last": "Bartlett","email": "jane@scentric.com"}],
+        inputType: 'code:JSON'
+      },
+
+      language: {
+        type: String,
+        defaultValue: 'en',
+        inputType: 'text',
+        inputDisabled: true
+      },
+
+      striped: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      filterable: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      sortable: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      selectable: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      singleSelect: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      showColumnChooser: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      hidePaginationControl: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      includeAllColumns: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      lightDomContent: {
+        type: String,
+        defaultValue: '<px-data-table-column name="first"></px-data-table-column>'
+      }
+
+    }
+
+  });
+</script>

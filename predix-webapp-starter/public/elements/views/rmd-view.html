@@ -1,0 +1,285 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/px-dropdown/px-dropdown.html">
+<link rel="import" href="../asset-browser/asset-browser.html">
+<link rel="import" href="../seed-table/seed-table.html">
+<link rel="import" href="../kpi-bar/kpi-bar.html">
+<link rel="import" href="rmd-view-styles.html">
+<link rel="import" href="../../bower_components/px-map/px-map.html" />
+<link rel="import" href="../../bower_components/px-map/px-map-tile-layer.html" />
+
+<dom-module id="rmd-view">
+  <template>
+    <style include="rmd-view-styles"></style>
+
+<!-- <div>
+      <asset-browser id="assetBrowser" asset-model="{{rmdAssetModel}}" opened-asset="{{openedAsset}}" asset-query-url="/api/predix-asset/asset"
+        asset-group-query-url="/api/predix-asset/group">
+      </asset-browser>
+    </div>  -->
+
+<!--<div class="flex flex--row flex--justify">
+      <div><h1 class="delta u-pl++">Kassandra Was Here</h1></div>
+      <div>
+        <div class="flex flex--row flex--right">
+          <px-dropdown class="flex u-pr u-pt" id="refreshFrequencyDropdown" display-value="Refresh Frequency" 
+            items='[{"key":"0","val":"No Refresh"},{"key":"3","val":"Every 3 sec"},{"key":"15","val":"Every 15 sec"},{"key":"60","val":"Every 60 sec"}]'>
+          </px-dropdown>
+          <px-icon class="u-pr u-pt" id="refreshTableBtn" icon="px-nav:reload"></px-icon>
+        </div>
+      </div>
+    </div> -->
+
+
+
+    <!-- <div class="u-pb">
+      <kpi-bar datapoints="[[kpiDatapoints]]" overall-label="[[kpiOverallLabel]]" overall-value="[[kpiOverallValue]]" overall-max="[[kpiOverallMax]]"
+        kpi-bar-wrapper-state="[[kpiBarWrapperState]]">
+      </kpi-bar>
+    </div> -->
+    
+    <px-app-nav style="margin-top:30px" 
+            items='[
+                    {"label":"Customer 1","id":"Cust1","icon":"px-fea:asset",
+                        "children":
+                        [
+                          {"label":"Shipment 1","id":"s1"},
+                          {"label":"Shipment 2","id":"s1"}
+                        ]
+                    },
+                    {"label":"Customer 2","id":"Cust2","icon":"px-fea:asset",
+                        "children":
+                        [
+                          {"label":"Shipment 1","id":"s1"},
+                          {"label":"Shipment 2","id":"s1"}
+                        ]
+                    },
+                    {"label":"Customer 3","id":"Cust3","icon":"px-fea:asset",
+                        "children":
+                        [
+                          {"label":"Shipment 1","id":"s1"},
+                          {"label":"Shipment 2","id":"s1"}
+                        ]
+                    },
+                    {"label":"Customer 4","id":"Cust4","icon":"px-fea:asset",
+                        "children":
+                        [
+                          {"label":"Shipment 1","id":"s1"},
+                          {"label":"Shipment 2","id":"s1"}
+                        ]
+                    },
+                    {"label":"Customer 5","id":"Cust5","icon":"px-fea:asset"},
+                    {"label":"Customer 6","id":"Cust6","icon":"px-fea:asset"},
+                    {"label":"Customer 7","id":"Cust7","icon":"px-fea:asset"},
+                    {"label":"Customer 8","id":"Cust8","icon":"px-fea:asset"}
+                  ]'
+                vertical selected-route='["alerts"]'>                 
+    </px-app-nav>
+
+<!--   <div style="float:left;">
+      <div class="row" ng-controller="ListingsController">
+        <div class="col-md-6">
+          <div class="input-group" id="searchBar">
+            <span class="input-group-addon" id="sizing-addon1"><span class="glyphicon glyphicon-search"></span></span>
+            <input type="text" class="form-control" placeholder="Search" ng-model="query">
+          </div>
+          <div class="tableWrapper">
+            <table class="table table-striped table-hover">
+              <tr>
+                <th>Customer Name</th>
+                <th></th>
+              </tr>
+              <tr ng-repeat="listing in customers | filter: query" ng-click="showDetails($index)">
+                <td>{{listing.name}}</td>
+                <td>
+                  <px-dropdown style="float:left; margin-left:0" display-value="{{listing.name}}">
+                    <px-dropdown-content extend-dropdown='true' extend-dropdown-by='25' max-cont-character-width='10' items='{{listing.name}}'>
+                    </px-dropdown-content>
+                  </px-dropdown>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div> -->
+
+    <div style="float:right; width:95%;">
+      <div>
+        <h1 style="margin-left: 100px;">GE MAP APP</h1>
+      </div>
+      <div style="height:400px; width:600px; display:flex">
+        <px-map zoom="8" lat="37.7749" lng="-122.4312" 
+        flex-to-size 
+        disable-scroll-zoom 
+        disable-touch-zoom>
+          <px-map-tile-layer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'>
+          </px-map-tile-layer>
+        </px-map>
+      </div>
+     <!--  <div style="margin-left:100px; border:5px solid black; width:1000px; height:350px">
+      </div> -->
+
+    </div>
+    
+<!--     <div class="sidebarRight">
+      <iron-ajax id="kpiBarAjaxEl"></iron-ajax>
+      <px-spinner></px-spinner>->
+       If the RMD datasource is not enabled, you can pass in an asset directly. 
+      <seed-table asset-data="{{openedAsset}}" show-asset-only="true"></seed-table>-->
+
+      <!-- If RMD datasource is enabled, call that and pass data to the table. -->
+<!--      <seed-table id="seedTable" rmd-data="{{rmdTableData}}"></seed-table>
+      <iron-ajax id="datatableAjaxEl"></iron-ajax>
+    </div> -->
+  </template>
+  <script>
+    Polymer({
+      is: 'rmd-view',
+      properties: {
+        rmdAssetModel: {
+          type: Object,
+          observer: '_assetModelChanged'
+        },
+        openedAsset: {
+          type: Object,
+          observer: '_openedAssetChanged'
+        },
+        rmdTableData: {
+          type: Object
+        },
+        displayTags: {
+          type: Array
+        },
+        showTimeseriesChart: {
+          type: Boolean,
+          value: false
+        },
+        wsUrl: {
+          type: String
+        },
+        kpiBarWrapperState: {
+          type: String
+        }
+      },
+
+      _formatTagsForDisplay: function (assetTag) {
+        var tags = []
+        Object.keys(assetTag).forEach(function (key) {
+          var tag = {
+            key: assetTag[key].timeseriesDatasource.tag,
+            val: assetTag[key].label,
+            unit: 'psi'
+          }
+          if (tag.key.indexOf('Temperature') > -1) {
+            tag.unit = 'F';
+          } else if (tag.key.indexOf('Ratio') > -1) {
+            tag.unit = '';
+          } else if (tag.key.indexOf('Velocity') > -1) {
+            tag.unit = 'm/s'
+          }
+          tags.push(tag);
+        });
+        return tags;
+      },
+      _openedAssetChanged: function (newVal) {
+        console.log('asset opened:', newVal);
+        this.$.datatableAjaxEl.url = "/api/datagrid" + newVal.uri;
+        this.$.kpiBarAjaxEl.url = this.$.datatableAjaxEl.url + '/summary';
+        this.$.datatableAjaxEl.generateRequest();
+        if (newVal.assetTag) {
+          this.displayTags = this._formatTagsForDisplay(newVal.assetTag);
+        }
+        this.showTimeseriesChart = newVal.uri.indexOf('asset') >= 0;
+      },
+      _assetModelChanged: function (newVal) {
+        console.log('asset model changed:', newVal);
+      },
+
+      // We'll load the timeseries-chart asynchronously, since it's pretty heavy.
+      _loadFragment: function (elementId, fragmentPath) {
+        if (Polymer.isInstance(this.$[elementId])) {
+          return;
+        }
+        Polymer.Base.importHref(fragmentPath, null, function () {
+          console.log('failed to load:', fragmentPath);
+        }, true);
+      },
+
+      ready: function () {
+        this._loadFragment('tsChart', '/elements/timeseries-chart/timeseries-chart.html');
+        // set copy of 'this' for callback function use below
+        var that = this;
+        // initialize refresh interval
+        this.refreshTimerInterval = 0;
+        this.wsUrl = document.querySelector('#view').elementData.wsUrl;
+
+        this.$.assetBrowser.addEventListener('px-app-asset-selected', function(evt) {
+          console.log('evt', evt);
+          this.openedAsset = evt.detail.item;
+        }.bind(this));
+
+        this.$.kpiBarAjaxEl.addEventListener('response', function (evt) {
+          var data = evt.detail.response;
+          if (Array.isArray(data)) {
+            data = data[0];
+          }
+          var kpis = data.kpis, overall = data.overall;
+          kpis.forEach(function(kpi) {
+            if (kpi.label && kpi.label.toLowerCase().indexOf('compressionratio') > -1) {
+              kpi.label = 'Compression Ratio (avg)';
+            }
+          });
+          this.kpiDatapoints = kpis;
+          this.kpiOverallLabel = overall.title;
+          this.kpiOverallValue = overall.percentage;
+          this.kpiOverallMax = "100";
+        }.bind(this));
+
+        this.$.datatableAjaxEl.addEventListener('response', function (evt) {
+          this.rmdTableData = evt.detail.response;
+          this.$.kpiBarWrapperState = 'kpi-bar-wrapper-waiting';
+          this.$.kpiBarAjaxEl.generateRequest();
+
+        }.bind(this));
+
+        // Set refresh  button behavior
+        this.$.refreshTableBtn.addEventListener('click', function () {
+          console.log('sending request for rmdData');
+          that.$.datatableAjaxEl.generateRequest();
+        });
+
+        // Set refresh dropdown behavior
+        this.$.refreshFrequencyDropdown.addEventListener('px-dropdown-selection-changed', function (evt) {
+          var interval = 0;
+          switch (evt.detail.key) {
+            case '3':
+              interval = 3000;  // every 3 seconds
+              break;
+            case '15':
+              interval = 15000;  // every 3 seconds
+              break;
+            case '60':
+              interval = 60000;  // every 60 seconds
+              break;
+          }
+          clearInterval(that.refreshTimerInterval);
+
+          // If no refresh selected, clear any existing interval
+          if (interval === 0) {
+            that.refreshTimerInterval = 0;
+          }
+          // else set interval according to user selection
+          else {
+            that.refreshTimerInterval = setInterval(function () {
+              console.log('sending request for rmdData');
+              that.$.datatableAjaxEl.generateRequest();
+            }, interval);
+          }
+        });
+      }
+    });
+  </script>
+   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBxk5pDZ1hWM1MjbmC3GN5rea_sGOC7DTQ&callback=initMap"
+  type="text/javascript"></script>
+</dom-module>

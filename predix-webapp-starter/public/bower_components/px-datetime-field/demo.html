@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>px-datetime-input Demo</title>
+    <!-- Requires Webcomponents.js polyfill is provided by the page for browsers that don't support html imports -->
+    <script src="../webcomponentsjs/webcomponents-lite.min.js"></script>
+    <!-- Import custom element. Note: see comment about relative paths to dependencies in the *.html file referenced below -->
+    <link rel="import" href="px-datetime-field.html"/>
+    <link rel="import" href="../px-theme/px-theme-styles.html">
+    <style include="px-theme-styles" is="custom-style"></style>
+
+  </head>
+  <body>
+    <h2>px-datetime-field Demo</h2>
+      <px-datetime-field
+        date-time="2016-01-01T01:00:00.000Z"
+        date-format="YYYY/MM/DD"
+        time-format="HH:mm"
+        show-buttons="true"
+        show-time-zone="text"
+        time-zone="UTC">
+      </px-datetime-field>
+  </body>
+</html>

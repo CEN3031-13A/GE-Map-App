@@ -1,0 +1,49 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/px-view-header/px-view-header.html">
+<link rel="import" href="../../bower_components/px-card/px-card.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/marked-element/marked-element.html">
+
+<dom-module id="about-view">
+  <template>
+    <style>
+      div.markdown-html > h1 {
+        font-weight: normal;
+        font-size: 2.6667rem;
+        color: rgb(9, 129, 156);
+      }
+      div.markdown-html > h2 {
+        margin-top: 0;
+        font-size: 1.86667rem;
+        font-weight: normal;
+      }
+      px-card {
+        background: white;
+        color: rgb(44, 64, 76);
+        --px-card-header-color: black;
+      }
+    </style>
+    <px-card id="myCard" header-text="About this application">
+      <div>
+        <marked-element id="aboutContentMarkdown" markdown="">
+          <div class="markdown-html"></div>
+        </marked-element>      </div>
+    </px-card>
+    <iron-ajax id="aboutContentAjaxEl" handle-as="text"></iron-ajax>
+  </template>
+  <script>
+    Polymer({
+      is: 'about-view',
+      properties: {},
+      ready: function() {
+        var that = this;
+        this.$.aboutContentAjaxEl.url = "/docs";
+
+        this.$.aboutContentAjaxEl.addEventListener('response', function(evt) {
+          that.$.aboutContentMarkdown.markdown = evt.detail.response;
+        });
+        this.$.aboutContentAjaxEl.generateRequest();
+      }
+    });
+  </script>
+</dom-module>

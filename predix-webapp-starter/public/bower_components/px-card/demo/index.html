@@ -1,0 +1,51 @@
+<!-- Common imports -->
+<link rel="import" href="../../polymer/polymer.html" />
+<link rel="import" href="../../px-demo/css/px-demo-styles.html" />
+<link rel="import" href="../../px-demo/px-demo-collection.html" />
+
+<!-- Import sub componnent demos -->
+<link rel="import" href="px-card-demo.html" />
+<link rel="import" href="px-card-behavior-demo.html" />
+<link rel="import" href="px-deck-demo.html" />
+<link rel="import" href="px-dashboard-demo.html" />
+
+<!-- Demo DOM module -->
+<dom-module id="local-element-demo">
+  <template>
+    <style include="px-demo-styles" is="custom-style"></style>
+
+    <!-- Demo list/view change entrypoint -->
+    <px-demo-collection demos="{{demos}}"></px-demo-collection>
+
+  </template>
+
+</dom-module>
+<script>
+  Polymer({
+    is: 'local-element-demo',
+
+    properties: {
+      demos: {
+        type: Array,
+        value: function(){
+          return [
+            { name: "px-card",
+              tagName: "px-card-demo" },
+            { name: "px-card-behavior",
+              tagName: "px-card-behavior-demo" },
+            { name: "px-dashboard",
+              tagName: "px-dashboard-demo" },
+            { name: "px-deck",
+              tagName: "px-deck-demo" }
+          ]
+        }
+      },
+
+      chosenDemoName: {
+        type: String
+      }
+
+    }
+
+  });
+</script>

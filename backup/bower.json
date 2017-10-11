@@ -1,0 +1,29 @@
+{
+  "name": "Assignment4",
+  "description": "Routing server-side requests using ExpressJS",
+  "main": "server.js",
+  "authors": [
+    "Medhir Bhargava"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "app-layout": "^2.0.0",
+    "iron-a11y-keys-behavior": "PolymerElements/iron-a11y-keys-behavior#1 - 2",
+    "iron-behaviors": "PolymerElements/iron-behaviors#1 - 2",
+    "iron-fit-behavior": "PolymerElements/iron-fit-behavior#1 - 2",
+    "iron-dropdown": "^2.0.0",
+    "iron-icon": "^2.0.0",
+    "iron-iconset-svg": "^2.0.0",
+    "px-app-helpers": "^1.0.1",
+    "px-spinner": "^2.1.0",
+    "px-app-nav": "^2.0.9"
+  }
+}

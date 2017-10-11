@@ -1,0 +1,46 @@
+{
+  "name": "px-calendar-picker",
+  "version": "1.0.9",
+  "main": [
+    "px-calendar-picker.html"
+  ],
+  "ignore": [
+    "*.enc",
+    ".*",
+    "node_modules",
+    "bower_components",
+    "sass",
+    "HISTORY.md",
+    "CONTRIBUTING.md",
+    "OSS_Notice.pdf",
+    "scripts",
+    ".github",
+    ".editorconfig",
+    ".jshintrc",
+    ".gitignore",
+    "LICENSE.md",
+    "gulpfile.js",
+    "monogram-wdmk.png",
+    "README.md",
+    "wct.conf.json",
+    "px-calendar-picker.png"
+  ],
+  "dependencies": {
+    "polymer": "^1.9.0",
+    "px-datetime-common": "^1.0.0",
+    "px-icon-set": "^2.0.0"
+  },
+  "devDependencies": {
+    "px-theme": "^3.0.0",
+    "px-demo": "^2.0.0",
+    "px-buttons-design": "^2.0.0",
+    "px-tables-design": "^2.0.0",
+    "px-box-sizing-design": "^1.0.0",
+    "px-normalize-design": "^1.0.0",
+    "px-actionable-design": "^2.0.0",
+    "px-spacing-design": "^1.0.0"
+  },
+  "resolutions": {
+    "webcomponentsjs": "^0.7.24"
+  }
+}
