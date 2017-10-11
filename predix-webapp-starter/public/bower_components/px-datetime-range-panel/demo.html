@@ -1,0 +1,84 @@
+<!doctype html>
+
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>px-datetime-range-panel Demo</title>
+  <!-- Requires Webcomponents.js polyfill is provided by the page for browsers that don't support html imports -->
+  <script src="../webcomponentsjs/webcomponents-lite.min.js"></script>
+  <!-- Import custom element. Note: see comment about relative paths to dependencies in the *.html file referenced below -->
+
+  <link rel="import" href="../px-theme/px-theme-styles.html">
+  <style include="px-theme-styles" is="custom-style"></style>
+
+  <link rel="import" href="px-datetime-range-panel.html" />
+
+  <style>
+    .properties {
+      margin-top: 400px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h3>Demo</h3>
+
+  <template id="just-for-demo" is="dom-bind">
+    <px-datetime-range-panel id="panel" hide-time="{{hideTime}}" hide-presets="{{hidePresets}}" show-buttons="{{showButtons}}" time-format="{{timeFormat}}" block-future-dates="{{blockFutureDates}}" block-past-dates="{{blockPastDates}}" range="{{range}}" is-valid="{{isValidd}}"
+        time-zone="{{timeZone}}">
+    </px-datetime-range-panel>
+    <div class="properties">
+      <h3>Properties</h3>
+      <div>Hide time:
+        <input type="checkbox" checked="{{hideTime::change}}"></input>
+      </div>
+      <div>Hide presets:
+        <input type="checkbox" checked="{{hidePresets::change}}"></input>
+      </div>
+      <div>Show buttons:
+        <input id="showButtons" type="checkbox" checked="{{showButtons::change}}"></input>
+      </div>
+      <div>Block future dates
+        <input type="checkbox" checked="{{blockFutureDates::change}}"></input>
+      </div>
+      <div>Block past dates
+        <input type="checkbox" checked="{{blockPastDates::change}}"></input>
+      </div>
+      <div>Time format:
+        <input id="timeFormat" type="text" value="{{timeFormat::input}}"></input>
+      </div>
+      <div>Time zone:
+        <input id="timeZone" type="text" value="{{timeZone::input}}"></input>
+      </div>
+      <div>presets:
+        <textarea id="textArea" value="{{presetRanges::input}}" style="width:350px; height:230px"></textarea>
+      </div>
+      <h3>Readonly Properties</h3>
+      <div>Is Valid:
+        <input type="checkbox" disabled checked="{{isValidd::change}}"></input>
+      </div>
+    </div>
+  </template>
+  <script>
+    document.addEventListener('WebComponentsReady', function() {
+      var panel = document.getElementById('panel'),
+        textArea = document.getElementById('textArea'),
+        timeFormat = document.getElementById('timeFormat'),
+        showButtons = document.getElementById('showButtons');
+
+      textArea.addEventListener('input', function() {
+        panel.presetRanges = JSON.parse(textArea.value);
+      });
+
+      textArea.value = JSON.stringify(panel.presetRanges, null, 4);
+      showButtons.checked = panel.showButtons;
+      timeFormat.value = panel.timeFormat;
+
+    });
+  </script>
+</body>
+
+</html>

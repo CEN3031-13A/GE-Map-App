@@ -1,0 +1,114 @@
+<link rel="import" href="px-datetime-shared-behavior.html" />
+
+<script>
+
+/**
+  ```pxDatetimeBehavior```
+
+  This behavior is for all ```px-{datetime}-{picker}``` components.
+
+  Dependencies: momentjs
+
+  @polymerBehavior pxDatetimeBehavior
+*/
+
+var pxDatetimeBehavior = [{
+
+  properties: {
+    /**
+     * Moment value with the date or time to display.  Will be parsed according to the moment format. (See momentFormat property.)
+     * Defaults to now.
+     *
+     * @private
+     */
+    momentObj: {
+      type: Object,
+      notify: true,
+      value: function() {
+                return Px.moment().tz(this.timeZone);
+              }
+    },
+    /**
+     *
+     * This is the string you use to interact with px-datetime components. It holds
+     * a date and time representing the value in the corresponding component.
+     *
+     * Formatted as an ISO8601 string:
+     * ```
+     * "2013-01-07T22:44:30.652Z"
+     * ```
+     *
+     * This will be changed when the user submits a new date/time.
+     *
+     * @default Right now in milliseconds;
+     */
+    dateTime: {
+      type: String,
+      notify: true,
+      value: function() {
+        return Px.moment().milliseconds(0).toISOString();
+      },
+      observer: '_notifyDateTimeChanged'
+    }
+  }, //properties close bracket
+
+  observers: ['_localeChanged(language)',
+              '_timeZoneChanged(timeZone)'],
+
+  /**
+   * Make sure the moment obj pick up the possibly new moment locale
+   */
+  _localeChanged: function() {
+    if(this.momentObj) {
+      this.set('momentObj', this.momentObj.locale(Px.moment.locale()));
+    }
+  },
+  /**
+   * Makes sure the moment object reflects the right timezone.
+   */
+  _timeZoneChanged: function() {
+    if(this.momentObj) {
+      var newMom = this.momentObj.clone().tz(this.timeZone);
+      this.set('momentObj', newMom);
+    }
+  },
+  /**
+   * This event is fired differently depending on config:
+   *  - If the px-datetime component has an Apply button, then it is fired when the
+   *    user clicks the Apply button (or press enter) AND the selected date/time is valid
+   *  - If the px-datetime component does not have an apply button, then it is fired
+   *    every time a change is made to the date/time AND the selected date/time is valid
+   *
+   * @event px-datetime-submitted
+   *
+   * @param {string} dateTime - The ISO 8601 string representing the date/time chosen by the user
+   * @param {object} momentObj - The moment.js object representing the date/time chosen by the user
+   */
+  _notifyDateTimeChanged: function(dateTime) {
+    //make sure we keep the moment synchronized in case moment has been changed externally
+    if(!this.momentObj || this.momentObj.toISOString() !== this.dateTime) {
+      this.set('momentObj', this._convertISOtoMoment(this.dateTime));
+    }
+
+    this.fire('px-datetime-submitted', {dateTime: this.dateTime, momentObj: this.momentObj});
+  },
+  /**
+   * Applies the current moment object to the external facing datetime string
+   **/
+  _applyMomentToString: function() {
+    if(this.dateTime !== this.momentObj.toISOString()) {
+      this.set('dateTime', this.momentObj.toISOString());
+    }
+  },
+  /**
+   * Rollbacks the current moment object to the external facing datetime string
+   **/
+  _rollbackMomentFromString: function() {
+    //only rollback if actually necessary
+    if(this.momentObj.toISOString() !== this.dateTime) {
+      this.set('momentObj', this._convertISOtoMoment(this.dateTime));
+    }
+  }
+}, pxDatetimeSharedBehavior];
+
+</script>

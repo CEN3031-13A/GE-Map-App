@@ -1,0 +1,53 @@
+{
+  "name": "px-spinner",
+  "version": "2.1.0",
+  "main": [
+    "px-spinner.html"
+  ],
+  "ignore": [
+    "*.enc",
+    ".*",
+    "node_modules",
+    "bower_components",
+    "sass",
+    "HISTORY.md",
+    "CONTRIBUTING.md",
+    "OSS_Notice.pdf",
+    "scripts",
+    ".github",
+    ".editorconfig",
+    ".jshintrc",
+    ".gitignore",
+    "LICENSE.md",
+    "gulpfile.js",
+    "monogram-wdmk.png",
+    "README.md",
+    "wct.conf.json",
+    "px-spinner.png"
+  ],
+  "dependencies": {
+    "polymer": "^1.9.0",
+    "px-layout-design": "^1.0.0"
+  },
+  "devDependencies": {
+    "px-theme": "^3.0.0",
+    "px-demo": "^2.0.0",
+    "px-box-sizing-design": "^1.0.2",
+    "px-helpers-design": "^1.0.7",
+    "px-normalize-design": "^1.0.2"
+  },
+  "resolutions": {
+    "webcomponentsjs": "^0.7.24"
+  },
+  "homepage": "https://github.com/PredixDev/px-spinner",
+  "_release": "2.1.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v2.1.0",
+    "commit": "a68c147e537442b56f54363fdeb96045b9b10c98"
+  },
+  "_source": "https://github.com/PredixDev/px-spinner.git",
+  "_target": "^2.1.0",
+  "_originalSource": "px-spinner",
+  "_direct": true
+}

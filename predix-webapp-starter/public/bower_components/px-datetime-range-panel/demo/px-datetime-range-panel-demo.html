@@ -1,0 +1,219 @@
+<!-- Common imports -->
+<link rel="import" href="../../polymer/polymer.html" />
+
+<!-- Common demo imports -->
+<link rel="import" href="../../px-demo/px-demo-header.html" />
+<link rel="import" href="../../px-demo/px-demo-api-viewer.html" />
+<link rel="import" href="../../px-demo/px-demo-footer.html" />
+<link rel="import" href="../../px-demo/px-demo-configs.html" />
+<link rel="import" href="../../px-demo/px-demo-props.html" />
+<link rel="import" href="../../px-demo/px-demo-interactive.html" />
+<link rel="import" href="../../px-demo/px-demo-component-snippet.html" />
+<link rel="import" href="../../px-demo/px-demo-code-editor.html" />
+
+<!-- Imports for this component -->
+<link rel="import" href="../../px-demo/css/px-demo-styles.html" />
+<link rel="import" href="../px-datetime-range-panel.html" />
+
+<!-- Demo DOM module -->
+<dom-module id="px-datetime-range-panel-demo">
+  <template>
+    <style include="px-demo-styles" is="custom-style"></style>
+
+    <!-- Header -->
+    <px-demo-header
+        module-name="px-datetime-range-panel"
+        description="The px-datetime-range-panel component includes various elements used for structuring responsive layouts.
+    		This component allows the user to select a date and time range precisely to the second or millisecond.
+          The main use of this component is to be used in the px-rangepicker.">
+    </px-demo-header>
+
+    <!-- Interactive -->
+    <px-demo-interactive>
+      <!-- Configs -->
+      <px-demo-configs configs="[[configs]]" props="{{props}}" chosen-config="{{chosenConfig}}"></px-demo-configs>
+
+      <!-- Props -->
+      <px-demo-props props="{{props}}" config="[[chosenConfig]]" class="flex__item flex__item--msfix"></px-demo-props>
+
+      <px-demo-code-editor props="{{props}}" config="[[chosenConfig]]"></px-demo-code-editor>
+
+      <!-- Component ---------------------------------------------------------->
+      <px-demo-component>
+        <div style="height: 430px; width: 630px;">
+          <px-datetime-range-panel
+              style="position: relative;"
+              time-format="{{props.timeFormat.value}}"
+              show-buttons="{{props.showButtons.value}}"
+              block-future-dates="{{props.blockFutureDates.value}}"
+              block-past-dates="{{props.blockPastDates.value}}"
+              hide-time="{{props.hideTime.value}}"
+              time-zone="{{props.timeZone.value}}"
+              hide-presets="{{props.hidePresets.value}}"
+              min="{{props.min.value}}"
+              max="{{props.max.value}}">
+          </px-datetime-range-panel>
+        </div>
+      </px-demo-component>
+      <!-- END Component ------------------------------------------------------>
+
+      <px-demo-component-snippet
+          element-properties="{{props}}"
+          element-name="px-datetime-range-panel"
+          links-includes="[[linksIncludes]]">
+      </px-demo-component-snippet>
+    </px-demo-interactive>
+
+    <!-- API Viewer -->
+    <px-demo-api-viewer source="px-datetime-range-panel"></px-demo-api-viewer>
+
+    <!-- Footer -->
+    <px-demo-footer></px-demo-footer>
+
+  </template>
+
+</dom-module>
+<script>
+  Polymer({
+    is: 'px-datetime-range-panel-demo',
+
+    properties: {
+
+      /**
+       * Note: The actual data/values for `props` are placed in `this.demoProps`
+       * to create a static reference that Polymer shouldn't overwrite.
+       *
+       * On object containing all the properties the user can configure for this
+       * demo. Usually a pretty similar copy of the component's `properties` block
+       * with some additional sugar added to describe what kind of input the
+       * user will be shown and how that input should be configured.
+       *
+       * Note that `value` for each property is the default that will be set
+       * unless a config from `configs` is applied by default.
+       *
+       *
+       * @property demoProps
+       * @type {Object}
+       */
+      props: {
+        type: Object,
+        value: function(){
+          var props =  this.demoProps;
+              props.timeZone.inputLocalCandidates = Px.moment.tz.names();
+            return props;
+          }
+      },
+
+      /**
+       * An array of pre-configured `props` that can be used to provide the user
+       * with a set of common examples. These configs will be made available
+       * as a set of tabs the user can click that will automatically change
+       * the `props` to specific values.
+       *
+       * @property demoProps
+       * @type {Array}
+       */
+      configs: {
+        type: Array,
+        value: function(){
+          return [
+            { configName: "24 hour",
+              configReset: true },
+
+            { configName: "Past dates",
+              timeFormat: "hh:mm:ss A",
+              showButtons: false,
+              blockFutureDates: true,
+              blockPastDates: false,
+              hideTime: false,
+              timeZone: "UTC",
+              hidePresets: false,
+              min: "{}",
+              max: "{}"
+            },
+
+            { configName: "Only calendar",
+              timeFormat: "hh:mm:ss A",
+              showButtons: false,
+              blockFutureDates: false,
+              blockPastDates: false,
+              hideTime: true,
+              timeZone: "America/Los_Angeles",
+              hidePresets: true,
+              min: "{}",
+              max: "{}"
+            }
+          ]
+        }
+      }
+    },
+
+    /**
+     * A reference for `this.props`. Read the documentation there.
+     */
+    demoProps: {
+
+      hideTime: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      hidePresets: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      showButtons: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      blockFutureDates: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      blockPastDates: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      timeFormat: {
+        type: String,
+        defaultValue: 'HH:mm:ss',
+        inputType: 'text',
+        inputPlaceholder: 'HH:mm:ss',
+        readonly: false
+      },
+
+      timeZone: {
+        type: String,
+        defaultValue: 'UTC',
+        inputType: 'typeahead',
+        inputPlaceholder: 'UTC'
+      },
+
+      min: {
+        type: Object,
+        defaultValue: Px.moment().subtract(7, 'day'),
+        inputType: 'code:JSON'
+      },
+
+      max: {
+        type: Object,
+        defaultValue: Px.moment().add(7, 'day'),
+        inputType: 'code:JSON'
+      }
+
+    },
+
+    ready: function () {
+      this.linksIncludes = ['px-datetime-common/px-polygit-imports-datetime.html'];
+    }
+  });
+</script>

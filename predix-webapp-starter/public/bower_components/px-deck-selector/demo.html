@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>px-deck-selector Demo</title>
+    <!-- Requires Webcomponents.js polyfill is provided by the page for browsers that don't support html imports -->
+    <script src="../webcomponentsjs/webcomponents-lite.min.js"></script>
+
+    <link rel="import" href="../px-theme/px-theme-styles.html">
+    <style include="px-theme-styles" is="custom-style"></style>
+
+    <!-- Import custom element. Note: see comment about relative paths to dependencies in the *.html file referenced below -->
+    <link rel="import" href="px-deck-selector.html" />
+  </head>
+
+  <body>
+
+    <h3>Demo</h3>
+
+    <template is="dom-bind">
+        <div>Initializing with decks, selected deck url: <span>{{url}}</span></div>
+        <px-deck-selector id="withDecks" selected-deck-url="{{url}}"></px-deck-selector>
+
+        <br><br>
+
+        <div>Config Option to add or remove deck</>
+        <px-deck-selector id="withConfigOption" selected-deck-url="{{url}}" config-option="{{configOptions}}"></px-deck-selector>
+
+        <br><br>
+
+        <div>No decks - deck selector is hidden</div>
+        <px-deck-selector id="noDecks"></px-deck-selector>
+      </template>
+
+    <script>
+      window.addEventListener('WebComponentsReady', function() {
+
+        var selector = document.getElementById('withDecks');
+
+        // set deck objects on the element
+        selector.set('decks', [{
+          name: 'First Deck',
+          url: '/deck1'
+        }, {
+          name: 'Second Deck',
+          url: '/deck2'
+        }, {
+          name: 'Third Deck',
+          url: '/deck3'
+        }]);
+
+        var selector1 = document.getElementById('withConfigOption');
+
+        selector1.set(
+
+          'decks', [{
+            name: 'First Deck',
+            url: '/deck1'
+          }, {
+            name: 'Second Deck',
+            url: '/deck2'
+          }, {
+            name: 'Third Deck',
+            url: '/deck3'
+          }]);
+
+        selector1.set(
+          'configOptions', {
+            edit: true,
+            actionType: "Add Dashboard",
+            eventType: "addDashboard"
+          });
+
+        // add test event listener
+        selector.addEventListener('selected-deck-url-changed', function(e) {
+          console.log(e.detail.value);
+        });
+
+        // add test event listener
+        selector1.addEventListener('deckEvent', function(e) {
+          console.log(e.detail);
+        });
+
+      });
+    </script>
+
+  </body>
+
+</html>

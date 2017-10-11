@@ -1,0 +1,46 @@
+{
+  "name": "px-overlay",
+  "version": "1.0.2",
+  "main": [
+    "px-overlay.html"
+  ],
+  "ignore": [
+    "*.enc",
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "sass",
+    "*.md",
+    "scripts",
+    ".github",
+    "gulpfile.js",
+    "wct.conf.json",
+    "test",
+    "OSS_Notice.pdf",
+    "*.png",
+    "npm-debug.log"
+  ],
+  "dependencies": {
+    "polymer": "^1.9.0",
+    "px-theme": "^3.0.0"
+  },
+  "devDependencies": {
+    "px-starter-kit-design": "^1.0.0",
+    "px-code-design": "^2.0.0",
+    "px-toggle-design": "^2.0.0",
+    "px-demo": "^2.0.0"
+  },
+  "resolutions": {
+    "webcomponentsjs": "^0.7.24"
+  },
+  "homepage": "https://github.com/predixDev/px-overlay",
+  "_release": "1.0.2",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.0.2",
+    "commit": "d265de9f60711157b634555a44e8df4ed559f7e8"
+  },
+  "_source": "https://github.com/predixDev/px-overlay.git",
+  "_target": "^1.0.0",
+  "_originalSource": "px-overlay"
+}

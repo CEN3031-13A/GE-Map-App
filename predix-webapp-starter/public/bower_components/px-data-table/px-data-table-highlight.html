@@ -1,0 +1,101 @@
+<link rel="import" href="../polymer/polymer.html" />
+<link rel="import" href="css/px-data-table-highlight-styles.html">
+
+<!--
+
+Element to define and configure highlighting behavior for a given column (and hence cell or row).
+
+### Usage
+
+    <px-data-table-highlight
+      highlight-type="row"
+      highlight-method="isLongString"
+      import="px-example-highlight.html">
+    </px-data-table-highlight>
+
+
+### Styling
+The following custom properties are available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--px-data-table-highlight--high` | A high highlight | `rgba($alert-red, 0.25)`
+`--px-data-table-highlight--medium` | A medium highlight | `rgba($alert-yellow, 0.25)`
+`--px-data-table-highlight--low` | A low highlight | `rgba($alert-blue, 0.25)`
+
+@element px-data-table-highlight
+@blurb Element to define and configure highlighting behaviour for a given column (and hence cell or row).
+@homepage index.html
+@demo index.html
+-->
+<dom-module id="px-data-table-highlight">
+  <template>
+    <style include="px-data-table-highlight-styles"></style>
+
+    <span></span>
+    <content></content>
+  </template>
+</dom-module>
+
+<script>
+  Polymer({
+    is: 'px-data-table-highlight',
+
+    properties: {
+      /**
+       * A url that points to a file containing the JavaScript methods to be used for determining the highlighting behavior.
+       */
+      import: {
+        type: String,
+        value: ''
+      },
+      /**
+       * An object that holds the highlighting methods and attaches them to the window of the application.
+       */
+      highlight: {
+        type: Object,
+        value: function(){
+          return new Function();
+        }
+      },
+      /**
+       * A JavaScript method name from the file located at the `import` url.
+       * Highlight method receives three parameters: cell value, row data, column name.
+       */
+      highlightMethod: {
+        type: String,
+        value: ''
+      },
+      /**
+       * Property for what actually gets highlighted - either 'cell' or 'row'.
+       */
+      highlightType: {
+        type: String,
+        value: 'cell'
+      },
+      /**
+       * Property to set the pre-defined style of a highlight based on severity. One of 'high', 'medium' or 'low' - the colors for these three highlight types can be configured using the style variables above.
+       */
+      highlightValue: {
+        type: String,
+        value: 'low'
+      }
+    },
+
+    /**
+     * Loads the imported highlight function.
+     *
+     */
+    attached: function() {
+      this.importHref(this.import, function(e) {
+        if (this.highlightMethod && window.PxHighlight[this.highlightMethod]){
+          this.highlight = window.PxHighlight[this.highlightMethod];
+          this.fire('px-data-table-highlight-loaded');
+        }
+      }, function(e) {
+        // loading error
+      }, false);
+    }
+
+  });
+</script>

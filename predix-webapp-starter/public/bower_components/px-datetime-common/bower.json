@@ -1,0 +1,46 @@
+{
+  "name": "px-datetime-common",
+  "version": "1.0.5",
+  "main": [
+    "px-datetime-common.html"
+  ],
+  "ignore": [
+    "*.enc",
+    "**/.*",
+    "scripts",
+    "*.md",
+    "*.png",
+    "npm-debug.log",
+    "gulpfile.js",
+    "sass",
+    ".github",
+    "bower_components",
+    "node_modules",
+    "test"
+  ],
+  "dependencies": {
+    "px-moment-imports": "^1.0.0",
+    "polymer": "^1.9.0",
+    "iron-a11y-keys-behavior": "^2.0.0",
+    "px-icon-set": "^2.0.0",
+    "app-localize-behavior": "^2.0.0",
+    "px-dropdown": "^4.0.0"
+  },
+  "devDependencies": {
+    "px-theme": "^3.0.0",
+    "px-normalize-design": "^1.0.0",
+    "px-box-sizing-design": "^1.0.0",
+    "px-flexbox-design": "^1.0.0",
+    "px-helpers-design": "^1.0.0",
+    "px-buttons-design": "^2.0.0",
+    "px-forms-design": "^2.0.0",
+    "px-list-bare-design": "^1.0.0",
+    "px-actionable-design": "^2.0.0",
+    "px-spacing-design": "^1.0.0",
+    "px-headings-design": "^1.0.0",
+    "px-demo": "^2.0.0"
+  },
+  "resolutions": {
+    "webcomponentsjs": "^0.7.24"
+  }
+}

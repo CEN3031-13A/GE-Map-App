@@ -1,0 +1,370 @@
+<link rel="import" href="../polymer/polymer.html"/>
+<link rel="import" href="../px-datetime-common/px-datetime-entry.html"/>
+<link rel="import" href="../px-datetime-common/px-datetime-behavior.html"/>
+<link rel="import" href="../px-datetime-common/px-datetime-range-behavior.html"/>
+<link rel="import" href="../px-datetime-common/px-datetime-button-behavior.html"/>
+<link rel="import" href="../px-datetime-common/px-datetime-buttons.html"/>
+<link rel="import" href="../px-datetime-field/px-datetime-field.html"/>
+<link rel="import" href="../px-datetime-common/validate.html"/>
+<link rel="import" href="css/px-datetime-range-field-styles.html"/>
+
+<!--
+The datetime components rely on <a href="https://momentjs.com/" target="_blank">Moment.js</a> and <a href="https://momentjs.com/timezone/" target="_blank">Moment Timezone</a>.
+
+### Usage
+
+    <px-datetime-range-field range="{{...}}">
+    </px-datetime-range-field>
+
+
+### Styling
+
+The following custom properties are available for styling. Please also refer to px-forms-design for additional style variables used by this component.
+
+Custom property | Description
+:----------------|:-------------
+`--px-datetime-range-field-to-color` | Text color of the "TO" between start and end date input fields
+
+@element px-datetime-range-field
+@homepage index.html
+@demo index.html
+-->
+<dom-module id="px-datetime-range-field">
+  <template>
+    <style include="px-datetime-range-field-styles"></style>
+
+    <div class$="{{_getWrapClass(allowWrap)}} dt-position flex flex--top">
+      <div id="fromFields" class$="{{_getFromFieldClass(allowWrap)}}">
+        <span class="a11y">[[localize('from')]]</span>
+        <px-datetime-field
+          id="fromDate"
+          moment-obj="{{fromMoment}}"
+          date-format="[[dateFormat]]"
+          time-format="[[timeFormat]]"
+          show-time-zone="[[showTimeZone]]"
+          time-zone="{{timeZone}}"
+          hide-time="[[hideTime]]"
+          hide-date="[[hideDate]]"
+          hide-icon="{{hideIcon}}"
+          is-valid="{{_fromValid}}"
+          show-validation-message="[[_showFromValidationMessage]]"
+          block-future-dates="{{blockFutureDates}}"
+          block-past-dates="{{blockPastDates}}"
+          resources="[[resources]]"
+          language="[[language]]"
+          formats="[[formats]]"
+          min="[[min]]"
+          max="[[max]]">
+        </px-datetime-field>
+        <template is="dom-if" if="{{!_isRangeValid}}">
+          <div class="form-field__help validation-error dt-validation-text">[[localize('from cannot be later than to date')]]</div>
+        </template>
+      </div>
+      <span class="caps dt-to u-mh-">[[localize('TO')]]</span>
+      <div id="toFields" class$="{{_getToFieldClass(showButtons, allowWrap)}}">
+        <px-datetime-field
+          id="toDate"
+          moment-obj="{{toMoment}}"
+          date-format="[[dateFormat]]"
+          time-format="[[timeFormat]]"
+          show-time-zone="[[showTimeZone]]"
+          time-zone="{{timeZone}}"
+          hide-time="[[hideTime]]"
+          hide-date="[[hideDate]]"
+          hide-icon="{{hideIcon}}"
+          is-valid="{{_toValid}}"
+          show-validation-message="[[_showToValidationMessage]]"
+          block-future-dates="{{blockFutureDates}}"
+          block-past-dates="{{blockPastDates}}"
+          resources="[[resources]]"
+          language="[[language]]"
+          formats="[[formats]]"
+          min="[[min]]"
+          max="[[max]]">
+        </px-datetime-field>
+      </div>
+      <template is="dom-if" if="{{showButtons}}">
+        <px-datetime-buttons
+          id="dtBtns"
+          is-submit-button-valid="[[isValid]]"
+          class="u-mb"
+          resources="[[resources]]"
+          language="[[language]]"
+          formats="[[formats]]">
+        </px-datetime-buttons>
+      </template>
+    </div>
+  </template>
+</dom-module>
+
+<script>
+  Polymer({
+
+    is: 'px-datetime-range-field',
+
+    behaviors: [
+      pxDatetimeRangeBehavior,
+      pxDatetimeButtonBehavior,
+      validate
+    ],
+
+    properties: {
+      /**
+       * Moment format string for the DATE format to display/validate this field against
+       * (see http://momentjs.com/docs/#/parsing/string-format/)
+       *
+       */
+      dateFormat: {
+          type: String,
+          value: 'YYYY-MM-DD'
+      },
+      /**
+       * Moment format string for the TIME format to display/validate this field against
+       * (see http://momentjs.com/docs/#/parsing/string-format/)
+       *
+       */
+      timeFormat: {
+          type: String,
+          value: 'HH:mm:ss'
+      },
+      /**
+       *
+       * Can be set to show the timezone. Can have 2 values:
+       *  - 'dropdown': shows the time zone as a dropdown which the user can use to select a different time zone. Only contains a subset of all timezones
+       *  - 'extendedDropdown': shows the time zone as a dropdown which the user can use toselect a different time zone. Contains all existing timezones (588)
+       *  - 'text': shows the time zone as text, non editable
+       *  - 'abbreviatedText': shows the time zone as an abbreviated text, non editable (such as PST, EST...)
+       */
+      showTimeZone: {
+        type: String,
+        value: ''
+      },
+      /**
+       * Controls whether time is displayed in this field
+       */
+      hideTime: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Controls whether date should be hidden in this field. Typically used
+       * in combination with hideTime to make the field showing only the time
+       */
+      hideDate: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Controls whether the calendar/clock icons should be hidden
+       */
+      hideIcon: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Booleaning stating if the date, time, or range is valid.
+       */
+      isValid: {
+        type: Boolean,
+        notify: true,
+        computed: '_getIsValid(_fromValid, _toValid, _isRangeValid)'
+      },
+      /**
+       * used internally to determine if the range validation error should be displayed
+       */
+      _isRangeValid: {
+        type: Boolean,
+        computed: '_getIsRangeValid(fromMoment, toMoment)'
+      },
+      /**
+       * Reflects if the from field is valid
+       */
+      _fromValid: {
+        type: Boolean,
+        value: true
+      },
+      /**
+       * Reflects if the to field is valid
+       */
+      _toValid: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Used to determine which valdiation message to show when there are multple invalid fields.
+       */
+      _showFromValidationMessage: {
+        type: Boolean,
+        value: true
+      },
+      /**
+       * Used to determine which valdiation message to show when there are multple invalid fields.
+       */
+      _showToValidationMessage: {
+        type: Boolean,
+        value: true
+      },
+      /**
+       * Hides the validation messages if set to true
+       */
+      hideValidationMessages: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Used to prevent this element from firing px-datetime-range-submitted
+       * event and prevent changes to range
+       */
+      preventNotificationOnChange: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Allows the component to wrap the fields and buttons
+       */
+      allowWrap: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * List of key/values to be included for translating this component
+       */
+      resources: {
+        type: Object,
+        value: function() {
+          return {
+            'en': {
+              'from can not be later than to': 'from can not be later than to',
+              'from': 'from',
+              'TO': 'TO'
+            }
+          };
+        }
+      }
+    },
+    /**
+     * Key bindings for iron-a11y-keys-behavior
+     */
+    keyBindings: {
+      'esc' : '_onEsc',
+      'enter': '_onEnter'
+    },
+    observers: [
+      '_momentChanged(fromMoment, toMoment)',
+      '_validationMessagePriority(_fromValid, _toValid, _isRangeValid, hideValidationMessages)'
+    ],
+    /**
+     * Sets up listeners for a variety of events fired from or passing through this component
+     */
+    ready: function() {
+      // listens for a button click, enter key, or esp key
+      this.listen(this, 'px-datetime-button-clicked', '_dateTimeButtons');
+      this.listen(this.$.fromDate, 'px-next-field', '_focusFirstToEntry');
+      this.listen(this.$.toDate, 'px-previous-field', '_focusLastFromEntry');
+      this.listen(this, 'px-datetime-button-clicked', '_dateTimeButtons');
+    },
+    /*
+     * Focuses select on the first entry of the 'to' field
+     */
+    _focusFirstToEntry: function(evt) {
+      this.$.toDate._focusFirstEntry();
+      evt.stopPropagation();
+      evt.stopImmediatePropagation();
+    },
+    /*
+     * Focuses select on the first entry of the 'from' field
+     */
+    _focusLastFromEntry: function(evt) {
+      this.$.fromDate._focusLastEntry();
+      evt.stopPropagation();
+      evt.stopImmediatePropagation();
+    },
+    /**
+     * helper fuction to style the outer div
+     */
+    _getWrapClass: function(allowWrap) {
+      return allowWrap ? "flex--wrap" : "";
+    },
+    /**
+     * helper function to style #fromFields
+     */
+    _getFromFieldClass: function(allowWrap){
+      return allowWrap ? "u-pb+" : "";
+    },
+    /**
+     * helper function to style #toFields
+     */
+    _getToFieldClass: function(showButtons, allowWrap){
+      var classList= "";
+      classList += showButtons ? "u-mr- " : "";
+      classList += (allowWrap && showButtons) ? "u-pb+" : "";
+      return classList;
+    },
+    /**
+     * computer function to determine if something is valid
+     */
+    _getIsValid: function(_fromValid, _toValid, _isRangeValid) {
+      if(_fromValid && _toValid && _isRangeValid){
+        return true;
+      }
+      return false;
+    },
+    /**
+     * computer function to determine if the range is valid
+     */
+    _getIsRangeValid: function(fromMoment, toMoment) {
+      if (!this._validateRangeOrder()) {
+        this.$.fromDate._forcedFailedClass = true;
+        this.$.toDate._forcedFailedClass = true;
+        return false;
+      }else{
+        this.$.fromDate._forcedFailedClass = false;
+        this.$.toDate._forcedFailedClass = false;
+        return true;
+      }
+    },
+    /**
+     * Determines which validation message is displayed
+     * Show validation messages for range first, then from, and then to
+     */
+    _validationMessagePriority:function(_fromValid, _toValid, _isRangeValid, hideValidationMessages){
+      if (!_isRangeValid || hideValidationMessages){
+        this.set('_showFromValidationMessage', false);
+        this.set('_showToValidationMessage', false);
+      } else if (!_fromValid) {
+        this.set('_showFromValidationMessage', true);
+        this.set('_showToValidationMessage', false);
+      } else if (!_toValid) {
+        this.set('_showToValidationMessage', true);
+      }
+    },
+    /**
+     */
+    _dateTimeButtons: function(evt) {
+      if(!this.preventNotificationOnChange) {
+        this._applyCurrentValues(evt.detail.action);
+      }
+    },
+    /**
+     */
+    _onEsc: function(evt) {
+      if(!this.preventNotificationOnChange && this.showButtons) {
+        this._applyCurrentValues(false);
+      }
+    },
+    /**
+     */
+    _onEnter: function(evt) {
+      if(!this.preventNotificationOnChange && this.showButtons) {
+        this._applyCurrentValues(true);
+      }
+    },
+    /**
+     */
+    _momentChanged: function(momentObj) {
+      if(!this.showButtons && this.isValid && !this.preventNotificationOnChange) {
+        this._applyCurrentValues(true);
+      }
+    },
+  });
+</script>

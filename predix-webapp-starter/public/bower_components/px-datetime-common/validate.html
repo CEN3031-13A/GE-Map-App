@@ -1,0 +1,221 @@
+<link rel="import" href="../app-localize-behavior/app-localize-behavior.html" />
+<script>
+/**
+  ```validate```
+
+  A collection of validation scripts for px-datetime components
+
+  Dependencies: momentjs
+
+  @polymerBehavior validate
+*/
+
+var validate = [Polymer.AppLocalizeBehavior, {
+  properties: {
+    /**
+     * Boolean stating if the current component is valid. Gets updated in '_validateInput'
+     *
+     * @private
+    */
+    isValid:{
+      type:Boolean,
+      value:true,
+      notify:true
+    },
+    /**
+     * Boolean stating if the neighbor, dependent component has passed validation
+     *
+     * Example: 'px-datetime-entry' can be either a date input or a time input. If you want a full date-time, you need both.
+     * If 'this' is a time input, you want the neighbor date input to also have passed validation before accepting the full date-time.
+     *
+     * @private
+     */
+    neighborValid:{
+      type:Boolean,
+      value:true
+    },
+    /**
+     * String used to describe the current invalid state
+     */
+    validationErrorMessage:{
+      type: String,
+      value: 'invalid'
+    },
+    /**
+     * set a default for localizing
+     */
+    language: {
+      type: String,
+      value: 'en'
+    },
+    /**
+     * Use the key for localization if value for  language is missing. Should
+     * always be true for px components
+     */
+    useKeyIfMissing: {
+      type: Boolean,
+      value: true
+    },
+    /**
+     * used to pass in strings for localization
+     */
+    resources: {
+      type: Object,
+      value: function() {
+        return {
+          'en': {
+            'Future dates are not allowed': 'Future dates are not allowed',
+            'Past dates are not allowed': 'Past dates are not allowed',
+            'Year': 'Year',
+            'Month': 'Month',
+            'Day': 'Day',
+            'Hour': 'Hour',
+            'Minute': 'Minute',
+            'Second': 'Second',
+            'Millisecond': 'Millisecond',
+            'is not valid': 'is not valid',
+            'This hour is not within a 12 hour clock': 'This hour is not within a 12 hour clock'
+          }
+        };
+      }
+    }
+  },
+
+  observers: ['_updateValidationEvent(validationErrorMessage)'],
+
+  /**
+   * Validation function for 'px-datetime-entry'
+   *
+   * @return {Boolean} passed validation
+   */
+  _validateInput: function() {
+    var inputStr = '',
+        inputArr = Polymer.dom(this.root).querySelectorAll('.cell');
+
+    //Create a string from all of the fields put together
+    for (var i = 0; i < inputArr.length; i++) {
+      if(inputArr[i].momentFormat !== "Z"){
+        inputStr = inputStr + inputArr[i].dtWorkingCopy + inputArr[i].symbol;
+      }
+    }
+
+    inputStr = inputStr.trim();
+
+    //added to be able to use Moment strict parsing
+    inputStr = inputStr.split('\xa0').join(' ');
+    var inputMoment = Px.moment.tz(inputStr, this.momentFormat, this.timeZone),
+        notAllowedInFuture = this.dateOrTime.toLowerCase() === 'date' &&
+                             this.blockFutureDates &&
+                             inputMoment.isAfter(Px.moment.tz(Px.moment(), this.timeZone)),
+        notAllowedAfterMax = this.dateOrTime.toLowerCase() === 'date' &&
+                             Object.keys(this.max).length > 0 &&
+                             inputMoment.isAfter(this.max),
+        notAllowedInPast = this.dateOrTime.toLowerCase() === 'date' &&
+                           this.blockPastDates &&
+                           inputMoment.isBefore(Px.moment.tz(Px.moment(), this.timeZone)),
+        notAllowedBeforeMin = this.dateOrTime.toLowerCase() === 'date' &&
+                              Object.keys(this.min).length > 0 &&
+                              inputMoment.isBefore(this.min);
+
+    // if the component datetime string is a valid datetime
+    if((inputMoment.isValid() && !notAllowedInFuture && !notAllowedInPast && !notAllowedAfterMax && !notAllowedBeforeMin)) {
+      // turn off input box error outline
+      this.toggleClass('validation-error', false, this.$.wrapper);
+      /*
+        The input box only has date or time.
+        Clone the moment object so we have a full date-time.
+
+        We want to use clone so it stays in utc or local time
+      */
+      var newMoment = this.momentObj.clone().tz(this.timeZone);
+      // just use the relevant fields, so ok if not in utc timemoment
+      var typedInMoment = Px.moment.tz(inputStr, this.momentFormat, this.timeZone);
+
+      // since the input box only has date or time, just reset that portion of the moment object
+      if (this.dateOrTime.toLowerCase() === 'date') { // if i'm typing in a date field, set the new date
+        newMoment.date(1); // first, 'zero' the date back to the first of the month to prevent any rolling effects (if a month doesn't have 30/31 days)
+        newMoment.year(typedInMoment.year()); // set the year
+        newMoment.month(typedInMoment.month()); // then the month
+        newMoment.date(typedInMoment.date()); // and finally the date, to make sure we don't have any rolling effects
+      } else {
+        newMoment.hour(typedInMoment.hour());
+        newMoment.minute(typedInMoment.minute());
+        newMoment.second(typedInMoment.second());
+        newMoment.millisecond(typedInMoment.millisecond());
+      }
+
+      this.set('isValid', true);
+      // if the neighbor is also valid, then we can set our moment object
+      if(this.neighborValid && !this.momentObj.isSame(newMoment)) {
+        this.set('momentObj', newMoment);
+        this.fire('px-moment-changed',{'momentObj':newMoment})
+      }
+      return true;
+
+    } else {
+      //the input box string is not a valid date/time
+      if(notAllowedInFuture) {
+        this.set('validationErrorMessage', this.localize('Future dates are not allowed'));
+      } else if(notAllowedInPast) {
+        this.set('validationErrorMessage', this.localize('Past dates are not allowed'));
+      } else {
+        var invalidAt = inputMoment.invalidAt();
+
+        if(invalidAt !== -1) {
+          switch(invalidAt) {
+            case 0:
+              this.set('validationErrorMessage', this.localize('Year') + ' ' + inputMoment._a[invalidAt] + ' ' + this.localize('is not valid'));
+              break;
+            case 1:
+              this.set('validationErrorMessage', this.localize('Month') + ' ' + (inputMoment._a[invalidAt] + 1) + ' ' + this.localize('is not valid'));
+              break;
+            case 2:
+              this.set('validationErrorMessage', this.localize('Day') + ' ' + inputMoment._a[invalidAt] + ' ' + this.localize('is not valid'));
+              break;
+            case 3:
+              this.set('validationErrorMessage', this.localize('Hour') + ' ' + inputMoment._a[invalidAt] + ' ' + this.localize('is not valid'));
+              break;
+            case 4:
+              this.set('validationErrorMessage', this.localize('Minute') + ' ' + inputMoment._a[invalidAt]  + ' ' + this.localize('is not valid'));
+              break;
+            case 5:
+              this.set('validationErrorMessage', this.localize('Second') + ' ' + inputMoment._a[invalidAt] + ' ' + this.localize('is not valid'));
+              break;
+            case 6:
+              this.set('validationErrorMessage', this.localize('Millisecond') + ' ' + inputMoment._a[invalidAt] + ' ' + this.localize('is not valid'));
+              break;
+          }
+        } else if(inputMoment.parsingFlags().bigHour === true) {
+          this.set('validationErrorMessage', this.localize('This hour is not within a 12 hour clock'));
+        }
+      }
+
+      this.toggleClass('validation-error', true, this.$.wrapper);
+      this.set('isValid', false);
+      this._submitButtonState(false);
+
+      return false;
+    }
+
+  },
+  /**
+   * Fires when 'validationErrorMessage' is changed
+   *
+   * @event px-validation-message
+   * @param {string} validationErrorMessage - Values validationErrorMessage
+   */
+  _updateValidationEvent: function(validationErrorMessage){
+      this.fire('px-validation-message',{'validationErrorMessage': this.validationErrorMessage})
+  },
+  /**
+   * Sets the button state based on if validation has been passed or not. This in turn enables or disables the Submit button.
+   *
+   * @param {Boolean} state Where the validation has passed or failed
+   */
+  _submitButtonState: function(state) {
+      this.set('isSubmitButtonValid', state);
+  }
+}];
+
+
+</script>

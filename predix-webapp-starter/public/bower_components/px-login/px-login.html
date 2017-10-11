@@ -1,0 +1,259 @@
+<!--
+    Relative paths assume component is being run from inside an app or another component, where dependencies are flat
+    siblings. When this component is run from its own repo (e.g. tests, examples), we assume the server is started with
+    'gulp serve' (or similar server setup) to enable correct finding of bower dependencies for local runs.
+-->
+<link rel="import" href="../polymer/polymer.html"/>
+
+<link rel="import" href="css/px-login-styles.html"/>
+<link rel="import" href="../promise-polyfill/promise-polyfill-lite.html">
+<link rel="import" href="../px-popover/px-popover.html"/>
+<link rel="import" href="../iron-ajax/iron-ajax.html"/>
+<link rel="import" href="../app-localize-behavior/app-localize-behavior.html"/>
+<link rel="import" href="../px-icon-set/px-icon-set.html"/>
+<link rel="import" href="../px-icon-set/px-icon.html"/>
+
+<!--
+Element providing a login/logout button that integrates nicely with Cloud Foundry's UAA.
+Supports custom menu items for other routes in your application, for instance a "Settings" page.
+By default, the component will call UAA for user info on load, but this can be disabled with the fetch-user-info-on-load property.
+
+### Usage
+
+    <px-login
+      login-url="/login"
+      logout-url="/logout"
+      user-info-url="/userinfo"
+      fetch-user-info-on-load="true"
+      popover-location="bottom"
+      menu-items='[{"url":"#settings","label":"Settings"},{"url":"#account","label":"My Account"}]'
+      language="en">
+    </px-login>
+
+### Styling
+The following custom properties are available for styling:
+
+Custom property | Description
+:------------|:-------------
+`--px-login-button-width`   | Width of the login button including icons and text - inner text will be truncated if necessary to fit
+
+@element px-login
+@blurb Element providing a login/logout button.
+@homepage index.html
+@demo demo.html
+-->
+
+<dom-module id="px-login">
+  <template>
+    <style include="px-login-styles"></style>
+    <iron-ajax id="userInfoAjax" url="{{userInfoUrl}}" handle-as="json" method="GET"></iron-ajax>
+    <div>
+      <div hidden$="{{!_showLogin}}">
+        <button class="btn btn--bare login-button" id="loginButton" >
+          <px-icon icon="px-nav:generic-user" class="login-button--user-icon text--center"></px-icon> [[localize("Sign In")]]
+        </button>
+      </div>
+      <div hidden$="{{_showLogin}}">
+        <px-popover id="userPopover" orientation="[[popoverLocation]]" enhanced="true" for="userNameButton" hide-overlay="true">
+          <ul class="list-bare">
+            <template is="dom-repeat" items="{{menuItems}}">
+              <li class="login-menu--item truncate"><a class="actionable actionable--action" href$="{{item.url}}" title="{{item.label}}">{{item.label}}</a></li>
+            </template>
+            <li id="logoutButton"><a href="#" class="actionable actionable--action">[[localize("Sign Out")]]</a></li>
+          </ul>
+        </px-popover>
+        <button id="userNameButton" name="userNameButton" class="btn btn--bare login-button">
+          <px-icon icon="px-nav:generic-user" class="login-button--user-icon text--center"></px-icon>
+          <div class="truncate" title="{{userName}}">{{userName}}</div>
+          <px-icon icon="px-utl:chevron" class="login-button--chevron-icon"></px-icon>
+        </button>
+      </div>
+    </div>
+  </template>
+</dom-module>
+
+<script>
+  Polymer({
+
+    is: 'px-login',
+
+    behaviors: [
+      Polymer.AppLocalizeBehavior
+    ],
+
+    properties: {
+      /**
+      * URL for user login
+      *
+      * @property loginUrl
+      * @default '/login'
+      */
+      loginUrl: {
+          type: String,
+          value: '/login'
+      },
+      /**
+      * URL for fetching user info
+      *
+      * @property userInfoUrl
+      * @default '/userinfo'
+      */
+      userInfoUrl: {
+          type: String,
+          value: '/userinfo',
+          observer: '_fetchUserInfo'
+      },
+      /**
+      * URL for user logout
+      *
+      * @property
+      * @default '/logout'
+      */
+      logoutUrl: {
+          type: String,
+          value: '/logout'
+      },
+      /**
+      * username to display
+      *
+      * @property userName
+      */
+      userName: {
+        type: String
+      },
+
+      /**
+      * userInfo retrieved from UAA
+      *
+      * @property userInfo
+      */
+      userInfo: {
+        type: Object
+      },
+
+      /**
+       * Set to true to make a REST call for user info
+       *
+       */
+      doNotFetchUserInfoOnLoad: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * Where to position the popover: bottom, top, left, right
+       *
+       * @property popoverLocation
+       * @default 'bottom'
+       */
+      popoverLocation: {
+        type: String,
+        value: 'bottom'
+      },
+
+      /**
+       * A valid IETF language tag as a string that `app-localize-behavior` will
+       * use to localize this component.
+       *
+       * See https://github.com/PolymerElements/app-localize-behavior for API
+       * documentation and more information.
+       */
+      language: {
+        type: String,
+        value: 'en'
+      },
+      /**
+      * Use the key for localization if value for that language is missing.
+      * Should always be true for Predix components.
+      */
+      useKeyIfMissing: {
+        type: Boolean,
+        value: true
+      },
+      /**
+      * Library object of hardcoded strings used in this application.
+      * Used by `app-localize-behavior` in conjunction with `language`.
+      */
+      resources: {
+        type: Object,
+        value: function() {
+          return {
+            'en': {
+              "Sign In": "Sign In",
+              "Sign Out": "Sign Out"
+            }
+          }
+        }
+      },
+      /**
+       * An array of objects to specify custom menu items.
+       * Each object should look like this:
+       *   {url: "/foo", label: "Foo Bar"}
+       *
+       * @property menuItems
+       */
+      menuItems: {
+        type: Array
+      },
+
+      _showLogin: {
+        type: Boolean,
+        value: true,
+        computed: '_computeShowLogin(userName)'
+      }
+    },
+
+    /**
+    * Handles click on the "Sign in" button.
+    *
+    * @method loginClicked
+    */
+    loginClicked: function(event, detail, sender) {
+      window.location = Polymer.dom(this).getOwnerRoot().host.loginUrl;
+    },
+
+    /**
+    * Handles click on the "Sign out" button.
+    *
+    * @method logoutClicked
+    */
+    logoutClicked: function(event, detail, sender) {
+      event.preventDefault();
+      var pxLogin = Polymer.dom(this).getOwnerRoot().host;
+      pxLogin.userName = null;
+      pxLogin.userInfo = null;
+      window.location = pxLogin.logoutUrl
+    },
+
+    _computeShowLogin: function(userName) {
+      return !userName || userName.length < 1;
+    },
+
+    _fetchUserInfo: function(url) {
+      this.$.userInfoAjax.url = url;
+      if (url && !this.doNotFetchUserInfoOnLoad) {
+        this.$.userInfoAjax.generateRequest();
+      }
+    },
+
+    ready: function() {
+      var self = this;
+      this.$.loginButton.addEventListener('click', this.loginClicked);
+      this.$.logoutButton.addEventListener('click', this.logoutClicked);
+      this.$.userNameButton.addEventListener('click', function() {
+        // Need to wait a few ticks, to see if popover is available or not.
+        setTimeout(function() {
+          self.$.userPopover.show();
+        }, 10);
+      });
+      this.$.userInfoAjax.addEventListener('response', function(event) {
+        self.userName = event.detail.response.user_name;
+        self.userInfo = event.detail.response;
+      });
+      this.$.userInfoAjax.addEventListener('error', function(event) {
+        console.log(event.detail.error);
+      });
+      this._fetchUserInfo(this.userInfoUrl);
+    }
+  });
+</script>

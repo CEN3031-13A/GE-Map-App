@@ -1,0 +1,289 @@
+<!-- Common imports -->
+<link rel="import" href="../../polymer/polymer.html" />
+
+<!-- Common demo imports -->
+<link rel="import" href="../../px-demo/px-demo-header.html" />
+<link rel="import" href="../../px-demo/px-demo-api-viewer.html" />
+<link rel="import" href="../../px-demo/px-demo-footer.html" />
+<link rel="import" href="../../px-demo/px-demo-configs.html" />
+<link rel="import" href="../../px-demo/px-demo-props.html" />
+<link rel="import" href="../../px-demo/px-demo-interactive.html" />
+<link rel="import" href="../../px-demo/px-demo-component-snippet.html" />
+<link rel="import" href="../../px-demo/px-demo-code-editor.html" />
+
+
+
+
+<!-- Imports for this component -->
+<link rel="import" href="../../px-demo/css/px-demo-styles.html" />
+<link rel="import" href="../px-datetime-field.html" />
+
+<!-- Demo DOM module -->
+<dom-module id="px-datetime-field-demo">
+  <template>
+    <style include="px-demo-styles" is="custom-style"></style>
+
+    <!-- Header -->
+    <px-demo-header
+        module-name="px-datetime-field"
+        description="This component allows the user to select a date and time precisely to the second or millisecond.
+          The counter represents when the px-datetime-field event/date property of the
+        field is being fired/updated. The behavior depends on whether the field uses
+        buttons. If it has buttons, then it is fired when the user clicks the apply button AND the date/time is valid.
+        If it doesn't have buttons, then it is fired every time a valid change is made to the date or time.">
+    </px-demo-header>
+
+    <!-- Interactive -->
+    <px-demo-interactive>
+      <!-- Configs -->
+      <px-demo-configs configs="[[configs]]" props="{{props}}" chosen-config="{{chosenConfig}}"></px-demo-configs>
+
+      <!-- Props -->
+      <px-demo-props props="{{props}}" config="[[chosenConfig]]" class="flex__item flex__item--msfix"></px-demo-props>
+
+      <px-demo-code-editor props="{{props}}" config="[[chosenConfig]]" class="flex__item flex__item--msfix"></px-demo-code-editor>
+
+      <!-- Component ---------------------------------------------------------->
+      <px-demo-component>
+        <p class=u-mb0>Event fired: <strong>px-datetime-submitted</strong></p>
+        <p class="zeta u-mt0">See API Reference below for more details</p>
+        <p class="u-mb++">Current dateTime object: <strong>{{props.dateTime.value}}</strong></p>
+
+        <px-datetime-field
+            date-time="{{props.dateTime.value}}"
+            date-format="{{props.dateFormat.value}}"
+            time-format="{{props.timeFormat.value}}"
+            show-buttons="{{props.showButtons.value}}"
+            allow-wrap="{{props.allowWrap.value}}"
+            block-future-dates="{{props.blockFutureDates.value}}"
+            block-past-dates="{{props.blockPastDates.value}}"
+            hide-time="{{props.hideTime.value}}"
+            hide-date="{{props.hideDate.value}}"
+            show-time-zone="{{props.showTimeZone.value}}"
+            hide-icon="{{props.hideIcon.value}}"
+            time-zone="{{props.timeZone.value}}"
+            min="{{props.min.value}}"
+            max="{{props.max.value}}">
+        </px-datetime-field>
+      </px-demo-component>
+      <!-- END Component ------------------------------------------------------>
+
+      <px-demo-component-snippet
+          element-properties="{{props}}"
+          element-name="px-datetime-field"
+          links-includes="[[linksIncludes]]">
+      </px-demo-component-snippet>
+    </px-demo-interactive>
+
+    <!-- API Viewer -->
+    <px-demo-api-viewer source="px-datetime-field"></px-demo-api-viewer>
+
+    <!-- Footer -->
+    <px-demo-footer></px-demo-footer>
+
+  </template>
+
+</dom-module>
+<script>
+  Polymer({
+    is: 'px-datetime-field-demo',
+
+    properties: {
+
+      /**
+       * Note: The actual data/values for `props` are placed in `this.demoProps`
+       * to create a static reference that Polymer shouldn't overwrite.
+       *
+       * On object containing all the properties the user can configure for this
+       * demo. Usually a pretty similar copy of the component's `properties` block
+       * with some additional sugar added to describe what kind of input the
+       * user will be shown and how that input should be configured.
+       *
+       * Note that `value` for each property is the default that will be set
+       * unless a config from `configs` is applied by default.
+       *
+       *
+       * @property demoProps
+       * @type {Object}
+       */
+      props: {
+        type: Object,
+        value: function(){
+          var props =  this.demoProps;
+              props.timeZone.inputLocalCandidates = Px.moment.tz.names();
+            return props;
+          }
+      },
+
+      /**
+       * An array of pre-configured `props` that can be used to provide the user
+       * with a set of common examples. These configs will be made available
+       * as a set of tabs the user can click that will automatically change
+       * the `props` to specific values.
+       *
+       * @property demoProps
+       * @type {Array}
+       */
+      configs: {
+        type: Array,
+        value: function(){
+          return [
+
+            { dateTime: "2016-01-01T01:00:00.000Z",
+              dateFormat: "YYYY/MM/DD",
+              timeFormat: "hh:mm:ss A",
+              showButtons: false,
+              allowWrap: false,
+              blockFutureDates: false,
+              blockPastDates: false,
+              hideTime: false,
+              hideDate: false,
+              hideIcon: false,
+              showTimeZone: "dropdown",
+              timeZone: "UTC" },
+
+            { dateTime: "2016-01-01T01:00:00.000Z",
+              dateFormat: "MM/DD/YY",
+              timeFormat: "hh:mm:ss A",
+              showButtons: true,
+              allowWrap: true,
+              blockFutureDates: true,
+              blockPastDates: false,
+              hideTime: false,
+              hideDate: true,
+              hideIcon: false,
+              showTimeZone: "abbreviatedText",
+              timeZone: "America/Los_Angeles" },
+
+            { dateTime: "2016-01-01T01:00:00.000Z",
+              dateFormat: "DD/MM/YY",
+              timeFormat: "HH:mm:ss.SSS",
+              showButtons: false,
+              allowWrap: false,
+              blockFutureDates: true,
+              blockPastDates: false,
+              hideTime: true,
+              hideDate: false,
+              hideIcon: false,
+              showTimeZone: "dropdown",
+              timeZone: "America/New_York" },
+
+          ]
+        }
+      },
+      timeZoneList: {
+        type: Array,
+        value: function(){
+          return [
+            Px.moment.tz.names()
+          ]
+        }
+      },
+      timeZone:{
+        type: String,
+        value: 'UTC'
+      }
+    },
+
+    /**
+     * A reference for `this.props`. Read the documentation there.
+     */
+    demoProps: {
+
+      hideDate: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      hideTime: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      hideIcon: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      showButtons: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      allowWrap: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      blockFutureDates: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      blockPastDates: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      dateFormat: {
+        type: String,
+        defaultValue: 'YYYY/MM/DD',
+        inputType: 'text',
+        inputPlaceholder: 'YYYY/MM/DD'
+      },
+
+      timeFormat: {
+        type: String,
+        defaultValue: 'HH:mm:ss',
+        inputType: 'text',
+        inputPlaceholder: 'HH:mm:ss'
+      },
+
+      timeZone: {
+        type: String,
+        defaultValue: 'UTC',
+        inputType: 'typeahead',
+        inputPlaceholder: 'UTC',
+        inputLocalCandidates: []
+      },
+
+      showTimeZone: {
+        type: String,
+        defaultValue: 'dropdown',
+        inputType: 'dropdown',
+        inputChoices: ['none', 'dropdown', 'extendedDropdown', 'text', 'abbreviatedText']
+      },
+
+      dateTime: {
+        type: String,
+        defaultValue: Px.moment(),
+        inputType: 'text',
+        inputPlaceholder: 'ISO 8601 String',
+        inputDisabled: true
+      },
+
+      min: {
+        type: Object,
+        defaultValue: Px.moment().subtract(1, 'year'),
+        inputType: 'code:JSON'
+      },
+
+      max: {
+        type: Object,
+        defaultValue: Px.moment().add(1, 'year'),
+        inputType: 'code:JSON'
+      }
+    },
+
+    ready: function () {
+      this.linksIncludes = ['px-datetime-common/px-polygit-imports-datetime.html'];
+    },
+  });
+</script>

@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Web Component Test : Fixture for px-calendar</title>
+
+    <!-- Requires Webcomponents.js polyfill is provided by the page for browsers that don't support html imports -->
+    <script src="../bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+    <!-- web-component-tester automatically provides local copy of brower.js below
+         for any URL ending with "/web-component-tester/browser.js"
+         when wct is run from the command line -->
+    <script src="../web-component-tester/browser.js"></script>
+    <!-- Retain this link for px-theme.html -->
+    <!-- px-theme is needed for WCT to run without errors -->
+
+    <link rel="import" href="../../px-theme/px-theme-styles.html">
+    <style include="px-theme-styles" is="custom-style"></style>
+
+    <link rel="import" href="../px-calendar-picker.html" />
+
+    <!-- This script link will contain the generated script for basic wct test cases -->
+    <script src="px-calendar-picker-base-tests.js"></script>
+    <!-- This script link will contain the generated script stub for custom, developer-added test cases -->
+    <script src="px-calendar-picker-custom-tests.js"></script>
+  </head>
+
+  <body>
+    <h3>Web Component Test : Fixture for px-calendar</h3>
+    <div class="bigContainer">
+      <div class="container">
+        <h><strong>Choose a day range</strong></h>
+        <br>
+        <br>
+        <px-calendar-picker id="calendar1" block-future-dates></px-calendar-picker>
+      </div>
+      <div class="container">
+        <h><strong>Choose a month range</strong></h>
+        <br>
+        <br>
+        <px-calendar-picker id="calendar2" display-mode='month' hide-previous-button></px-calendar-picker>
+      </div>
+      <div class="container">
+        <h><strong>choose a year range</strong></h>
+        <br>
+        <br>
+        <px-calendar-picker id="calendar3" display-mode='year' hide-next-button></px-calendar-picker>
+      </div>
+    </div>
+    <div class="bigContainer">
+      <div class="container">
+        <h><strong>Choose a single day</strong></h>
+        <br>
+        <br>
+        <px-calendar-picker id="calendar4" prevent-range-selection></px-calendar-picker>
+      </div>
+      <div class="container">
+        <h><strong>Choose a range day</strong></h>
+        <br>
+        <br>
+        <px-calendar-picker id="calendar5"></px-calendar-picker>
+      </div>
+      <div class="container">
+        <h><strong>Choose a single year</strong></h>
+        <br>
+        <br>
+        <px-calendar-picker id="calendar6" prevent-range-selection display-mode='year'></px-calendar-picker>
+      </div>
+      <div class="bigContainer">
+        <div class="container">
+          <h><strong>Block dates before 9 may 2016</strong></h>
+          <br>
+          <br>
+          <px-calendar-picker id="calendarBlockBefore"></px-calendar-picker>
+        </div>
+        <div class="container">
+          <h><strong>Block dates after 9 may 2016</strong></h>
+          <br>
+          <br>
+          <px-calendar-picker id="calendarBlockAfter" max='2016-05-09T19:25:57.966Z'></px-calendar-picker>
+        </div>
+    </div>
+    <script>
+      window.addEventListener('WebComponentsReady', function(e) {
+        var cal = document.getElementById('calendarBlockBefore'),
+          date = Px.moment('2016-05-09T19:25:57.966Z');
+        cal.set('min', date);
+        cal = document.getElementById('calendarBlockAfter');
+        cal.set('max', date);
+      });
+    </script>
+  </body>
+</html>

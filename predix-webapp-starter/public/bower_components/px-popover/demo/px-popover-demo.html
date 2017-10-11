@@ -1,0 +1,158 @@
+<!-- Common imports -->
+<link rel="import" href="../../polymer/polymer.html" />
+
+<!-- Common demo imports -->
+<link rel="import" href="../../px-demo/px-demo-header.html" />
+<link rel="import" href="../../px-demo/px-demo-api-viewer.html" />
+<link rel="import" href="../../px-demo/px-demo-footer.html" />
+<link rel="import" href="../../px-demo/px-demo-configs.html" />
+<link rel="import" href="../../px-demo/px-demo-props.html" />
+<link rel="import" href="../../px-demo/px-demo-interactive.html" />
+<link rel="import" href="../../px-demo/px-demo-component-snippet.html" />
+
+<!-- Imports for this component -->
+<link rel="import" href="../../px-demo/css/px-demo-styles.html" />
+<link rel="import" href="../px-popover.html" />
+
+<!-- Demo DOM module -->
+<dom-module id="px-popover-demo">
+  <template>
+    <style include="px-demo-styles" is="custom-style"></style>
+
+    <!-- Header -->
+    <px-demo-header
+        module-name="px-popover"
+        description="The popover is similar to a tooltip, but is invoked by clicking instead of hovering on a target component. Popovers have an optional title, and can also contain richer content than a basic tooltip – longer or formatted text, labels, badges, etc. Popovers stay visible on screen until the user clicks outside of the popover.">
+    </px-demo-header>
+
+    <!-- Interactive -->
+    <px-demo-interactive>
+      <!-- Configs -->
+      <px-demo-configs configs="[[configs]]" props="{{props}}" chosen-config="{{chosenConfig}}"></px-demo-configs>
+
+      <!-- Props -->
+      <px-demo-props props="{{props}}" config="[[chosenConfig]]"></px-demo-props>
+
+      <!-- Component ---------------------------------------------------------->
+      <px-demo-component>
+        <div>
+          <button class="btn btn--tertiary" id="{{props.for.value}}" type="button" name="button">Click here</button>
+          <px-popover
+              for="{{props.for.value}}"
+              popover-title="{{props.popoverTitle.value}}"
+              popover-body="{{props.popoverBody.value}}"
+              orientation="{{props.orientation.value}}"
+              position="absolute"
+              enhanced="{{props.enhanced.value}}">
+              <template is="dom-if" if="{{props.enhanced.value}}">
+                <div>This is a form<form><input class="text-input" type="text" value="Input"></form></div>
+              </template>
+          </px-popover>
+        </div>
+      </px-demo-component>
+      <!-- END Component ------------------------------------------------------>
+
+      <px-demo-component-snippet
+          element-properties="{{props}}"
+          element-name="px-popover">
+      </px-demo-component-snippet>
+    </px-demo-interactive>
+
+    <!-- API Viewer -->
+    <px-demo-api-viewer source="px-popover" hide='["assignParentResizable","getTargetPositionCenterOfLeftRight","getTargetPositionCenterOfTopBottom","notifyResize","resizerShouldNotify","stopResizeNotificationsFor"]'></px-demo-api-viewer>
+
+    <!-- Footer -->
+    <px-demo-footer></px-demo-footer>
+
+  </template>
+
+</dom-module>
+<script>
+  Polymer({
+    is: 'px-popover-demo',
+
+    properties: {
+
+      props: {
+        type: Object,
+        value: function(){ return this.demoProps; }
+      },
+
+      configs: {
+        type: Array,
+        value: function(){
+          return [
+            { configName: "Default",
+              configReset: true },
+
+            { configName: "Bottom",
+              for: "btn1",
+              orientation: "bottom",
+              position: "absolute",
+              popoverTitle: "This is a bottom popover",
+              popoverBody: "This is a bottom popover body",
+              enhanced: false,
+              lightDomContent: "",
+              siblingElement: "<button class='btn btn--tertiary' id='btn1' type='button' name='button'>Click here</button>" },
+
+            { configName: "Enhanced",
+              for: "btn1",
+              orientation: "bottom",
+              position: "absolute",
+              popoverTitle: "",
+              popoverBody: "",
+              enhanced: true,
+              lightDomContent: "<form><label>This is a form<input class='text-input' type='text' value='Text Input'/></label></form>",
+              siblingElement: "<button class='btn btn--tertiary' id='btn1' type='button' name='button'>Click here</button>" }
+          ]
+        }
+      }
+    },
+
+    /**
+     * A reference for `this.props`. Read the documentation there.
+     */
+    demoProps: {
+      enhanced: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      orientation: {
+        type: String,
+        defaultValue: 'right',
+        inputType: 'dropdown',
+        inputChoices: ['left', 'right', 'top', 'bottom']
+      },
+
+      for: {
+        type: String,
+        defaultValue: 'btn1'
+      },
+
+      popoverTitle: {
+        type: String,
+        defaultValue: 'This is a px-popover',
+        inputType: 'text'
+      },
+
+      popoverBody: {
+        type: String,
+        defaultValue: 'Capable of displaying a longer body text than a tootip.',
+        inputType: 'text'
+      },
+
+      siblingElement: {
+        type: String,
+        defaultValue: "<button class='btn btn--tertiary' id='btn1' type='button' name='button'>Click here</button>"
+      },
+
+      lightDomContent: {
+        type: String,
+        defaultValue: ""
+      }
+    }
+
+  });
+</script>

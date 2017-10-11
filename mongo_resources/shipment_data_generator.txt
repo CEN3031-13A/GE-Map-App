@@ -1,0 +1,49 @@
+[
+  '{{repeat(5, 7)}}',
+  {
+    _id: '{{objectId()}}',
+    index: '{{index()}}',
+    isActive: '{{bool()}}',
+    logo: 'http://placehold.it/32x32',
+    age: '{{integer(20, 40)}}',
+    name: '{{company()}}',
+	email: '{{email()}}',
+	phone: '+1 {{phone()}}',
+	address: '{{integer(100, 999)}} {{street()}}, {{city()}}, {{state()}}, {{integer(100, 10000)}}',
+	about: '{{lorem(1, "paragraphs")}}',
+    registered: '{{date(new Date(2014, 0, 1), new Date(), "YYYY-MM-ddThh:mm:ss Z")}}',
+    orders: [
+      '{{repeat(random(5))}}',
+      {
+        id: '{{objectId()}}',
+        index: '{{index()}}',
+        shipments: [
+          '{{repeat(random(5))}}',
+          {
+            id: '{{objectId()}}',
+            tracking_number: '{{objectId()}}',
+            carrier: '{{random("UPS", "FedEx")}}',
+            origin: {
+				latitude: '{{floating(-90.000001, 90)}}',
+				longitude: '{{floating(-90.000001, 90)}}'
+			},
+            destination: {
+				latitude: '{{floating(-180.000001, 180)}}',
+				longitude: '{{floating(-180.000001, 180)}}'
+			},
+            current_location: {
+				latitude: '{{floating(-180.000001, 180)}}',
+				longitude: '{{floating(-180.000001, 180)}}'
+			},
+            ship_date: '{{date()}}',
+            expected_date: '{{date()}}',
+            contents: [
+              '{{repeat(random(3))}}',
+              '{{lorem(1, "words")}}'
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

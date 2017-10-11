@@ -1,0 +1,534 @@
+<link rel="import" href="../polymer/polymer.html"/>
+<link rel="import" href="px-calendar-cell.html"/>
+<link rel="import" href="../px-datetime-common/px-datetime-range-behavior.html"/>
+<link rel="import" href="../px-datetime-common/px-datetime-behavior.html"/>
+<link rel="import" href="../px-icon-set/px-icon-set.html"/>
+<link rel="import" href="../px-icon-set/px-icon.html"/>
+<link rel="import" href="css/px-calendar-picker-styles.html"/>
+
+<!--
+All datetime components rely on <a href="https://momentjs.com/" target="_blank">Moment.js</a> and <a href="https://momentjs.com/timezone/" target="_blank">Moment Timezone</a>.
+
+This element renders a calendar for a given decade, year, or month, based on `display-mode` and `base-date`.
+A user can either select a range of dates or a single date, based on the `prevent-range-selection` property.
+User-selected values can be read out from the `range` or `single-selected-date` properties accordingly.
+A single date or range can be pre-set by manually setting either `from-moment` (single date) or `from-moment` and `to-moment` (range) using valid Moment.js objects.
+
+### Usage
+
+    <px-calendar-picker
+      from-moment={...}
+      prevent-range-selection
+      single-selected-date={...}>
+    </px-calendar-picker>
+
+    <px-calendar-picker
+      from-moment={...}
+      to-moment={...}
+      range={...}>
+    </px-calendar-picker>
+
+### Styling
+The following custom properties are available for styling:
+
+Custom property | Description
+:----------------|:-------------
+`--px-calendar-text-color` | Default text color for dates on the calendar
+`--px-calendar-text-color--hover` | Text color for dates when hovered
+`--px-calendar-text-color--selected` | Text color for dates when selected
+`--px-calendar-title-color` | Color for the title and arrows
+`--px-calendar-sub-labels--text-color` | Text color for days of the week
+`--px-calendar-today-border` | Border color for today's date
+`--px-calendar-background-color--hover` | Background color for dates when hovered
+`--px-calendar-background-color--pressed` | Background color for dates when pressed
+`--px-calendar-background-color--selected` | Background color for dates when selected
+`--px-calendar-alt-background-color` | Background color for the range between start and end dates
+
+@element px-calendar-picker
+@homepage index.html
+@demo index.html
+-->
+<dom-module id="px-calendar-picker">
+  <template>
+    <style include="px-calendar-picker-styles"></style>
+
+    <div class$="{{_getTableClass(shrink)}}" id="calendar">
+      <!-- Caption: month+year and previous/next arrows  -->
+      <div class="caption">
+        <button type="button" on-tap="_onPrevious" class="actionable actionable--action title-color nextLastBtn">
+          <template is="dom-if" if="{{!hidePreviousButton}}">
+            <px-icon icon="px-nav:back" class="arrow"></px-icon>
+          </template>
+        </button>
+        <span on-tap="_onNextDisplayMode" class="actionable actionable--action title-color">[[_title]]</span>
+        <button id="btnNextMonth" type="button" on-tap="_onNext" class="actionable actionable--action title-color nextLastBtn">
+          <template is="dom-if" if="{{!hideNextButton}}">
+            <px-icon icon="px-nav:next" class="arrow"></px-icon>
+          </template>
+        </button>
+      </div>
+      <!-- Actual Calendar -->
+
+        <template is="dom-if" if="{{_isDayMode(_currentDisplayMode)}}">
+          <div class="tr">
+            <!-- Sunday -> Saturday -->
+            <template is="dom-repeat" items="{{daysOfTheWeek}}" as="dayOfTheWeek">
+              <div class="th caps">[[dayOfTheWeek]]</div>
+            </template>
+          </div>
+        </template>
+        <template is="dom-repeat" items="{{_valuesDisplayed}}" as="week" strip-whitespace>
+          <div class="tr">
+            <template is="dom-repeat" items="{{week}}" as="date" strip-whitespace>
+                <div class="td">
+                  <px-calendar-cell
+                      display-date="{{date}}"
+                      from-moment="[[fromMoment]]"
+                      to-moment="[[toMoment]]"
+                      block-future-dates="{{blockFutureDates}}"
+                      block-past-dates="{{blockPastDates}}"
+                      display-mode="{{_currentDisplayMode}}"
+                      block-dates-after="[[max]]"
+                      block-dates-before="[[min]]">
+                  </px-calendar-cell>
+                </div>
+            </template>
+          </div>
+        </template>
+    </div>
+  </template>
+</dom-module>
+
+<script>
+  Polymer({
+
+    is: 'px-calendar-picker',
+    behaviors: [pxDatetimeRangeBehavior],
+
+    properties: {
+
+      /**
+       * Moment object used as the base for the calendar (to decide which month to display)
+       */
+      baseDate: {
+        type: Object,
+        notify: true,
+        value: function() {
+          return Px.moment.tz(Px.moment(), this.timeZone);
+        },
+        observer: '_baseDateChanged'
+      },
+      /**
+       *  What the calendar should display:
+       *  - 'day': calendar displays all days of a month
+       *  - 'month': calendar displays all months in a year
+       *  - 'year': calendar displays a 10 years range
+       */
+      displayMode: {
+        type: String,
+        value: 'day',
+        observer: '_displayModeChanged'
+      },
+      /**
+       *  What the calendar should display:
+       *  - 'day': calendar displays all days of a month
+       *  - 'month': calendar displays all months in a year
+       *  - 'year': calendar displays a 10 year range
+       *
+       *  Can internally change when the user clicks the title and changes the mode
+       */
+      _currentDisplayMode: {
+        type: String,
+        observer: '_currentDisplayModeChanged',
+        value: 'day'
+      },
+      /**
+       * (optional)
+       *
+       * By default, the calendar will allow the user to select a date range by clicking on two
+       * different dates. If this property is set, the user will only be able to select a single date
+       * each time she clicks.
+       *
+       * If this property is set, then the 'singleSelectedDate' property will reflect the selected date. Otherwise
+       * the 'range' property should be observed and will reflect the selected date range.
+       */
+      preventRangeSelection: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * (optional)
+       *
+       * Reflects the selected date in ISO8601 string if the calendar is preventing range selection.
+       * Otherwise the 'range' property should be observed.
+       */
+      singleSelectedDate: {
+        type: String,
+        value: ''
+      },
+      /**
+       * (optional)
+       *
+       * Hides the 'previous' button on the calendar.
+       */
+      hidePreviousButton: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * (optional)
+       *
+       * Hides the 'next' button on the calendar.
+       */
+      hideNextButton: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * (optional)
+       *
+       * If set, allows the calendar picker to shrink rather than have a constant size.
+       * Typically the height would shrink when choosing months or years
+       */
+      shrink: {
+        type: Boolean,
+        value: false
+      },
+      /*
+      * Whether the calendar picker is currently at the selection level: showing days
+      * in day mode, choosing month in month mode or showing years in year mode.
+      */
+      isAtSelectionLevel: {
+        type: Boolean,
+        computed: '_isAtSelectionLevel(_currentDisplayMode, displayMode)'
+      },
+      /**
+       * The values currently displayed in the calendar cells, days, months or years
+       *
+       * @default []
+       */
+      _valuesDisplayed: {
+        type: Array,
+        value: function() { return [];}
+      },
+      /**
+       */
+      waitToFire: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       */
+      _title: {
+        type: String
+      }
+    },
+    observers: ['_renderCurrent(_currentDisplayMode)',
+                '_localeChanged(language)',
+                '_getCurrentTitle(_currentDisplayMode, baseDate)',
+                '_timeZoneChanged(timeZone)'],
+    ready: function() {
+      this.daysOfTheWeek = this._getDaysOfTheWeek();
+
+      var handler = this._cellClicked.bind(this);
+      this.addEventListener('px-cell-date-selected', handler);
+      this.toMoment = null;
+      this.fromMoment = null;
+    },
+
+    _localeChanged: function() {
+      if(Px.moment && this.baseDate && this._currentDisplayMode) {
+        this.daysOfTheWeek = this._getDaysOfTheWeek();
+        //reset base date so it picks up new moment locale
+        //get moment locale and update the base date
+        this.set('baseDate', this.baseDate.locale(Px.moment.locale()));
+        this._getCurrentTitle(this._currentDisplayMode, this.baseDate);
+        this._renderCurrent();
+      }
+    },
+
+    _timeZoneChanged: function() {
+      this.set('baseDate', Px.moment.tz(this.baseDate, this.timeZone));
+    },
+
+    _getTableClass: function(shrink) {
+      var base = "table table--no-cells text--center ";
+
+      if(!shrink) {
+        base += "constantSize "
+      }
+      return base;
+    },
+
+    _cellClicked: function(e) {
+      var momentDate = e.detail,
+          copy = e.detail.clone();
+
+      if(this._currentDisplayMode === 'year') {
+        if(this.displayMode === 'year') {
+          //we want to select this year.
+          this._selectDate(momentDate);
+          this.fire('px-date-selected', copy);
+        }
+        else {
+          //go to 'month' mode
+          this.set('baseDate', momentDate);
+          this.set('_currentDisplayMode', 'month');
+          e.stopPropagation();
+        }
+      }else if(this._currentDisplayMode === 'month') {
+        if(this.displayMode === 'month') {
+          //we want to select this month.
+          this._selectDate(momentDate);
+          this.fire('px-date-selected', copy);
+        }
+        else {
+          //go to 'day' mode
+          this.set('baseDate', momentDate);
+          this.set('_currentDisplayMode', 'day');
+          e.stopPropagation();
+        }
+      }else {
+        this._selectDate(momentDate);
+        this.fire('px-date-selected', copy);
+      }
+    },
+
+    _displayModeChanged: function() {
+      this.set('_currentDisplayMode', this.displayMode);
+    },
+
+    _currentDisplayModeChanged: function() {
+
+      if(this._currentDisplayMode === 'year') {
+        //make sure we display the beginning of the decade
+        var year = this.baseDate.year();
+        for(var i=0; i<10; i++) {
+          if(((year-i) % 10) ===1) {
+            break;
+          }
+        }
+
+        this.set('baseDate', this.baseDate.clone().subtract(i, 'years'));
+      } else {
+        this._renderCurrent();
+      }
+    },
+
+    _isDayMode: function(_currentDisplayMode) {
+      return _currentDisplayMode === 'day';
+    },
+
+    /**
+     * Change the display mode after the user clicked the title
+     */
+    _onNextDisplayMode: function() {
+      if(this._currentDisplayMode === 'day') {
+        this.set('_currentDisplayMode', 'month');
+      }else if(this._currentDisplayMode === 'month') {
+        this.set('_currentDisplayMode', 'year');
+      }
+      //else year already, do nothing
+    },
+
+    _getCurrentTitle: function(_currentDisplayMode, baseDate) {
+
+      if(_currentDisplayMode === 'day') {
+        this.set('_title', baseDate.format('MMMM') + ' ' + baseDate.format('YYYY'));
+      }else if(_currentDisplayMode === 'month') {
+        this.set('_title',baseDate.format('YYYY'));
+      }else {
+        this.set('_title',baseDate.format('YYYY') + ' - ' + baseDate.clone().add(9, 'years').format('YYYY'));
+      }
+    },
+
+    _getDaysOfTheWeek: function() {
+      var day = Px.moment().startOf('week');
+      var daysOfWeek = [];
+      for (var i = 0; i < 7; i++) {
+        daysOfWeek.push(day.format('dd'));
+        day.add(1, 'days');
+      }
+      return daysOfWeek;
+    },
+
+    _renderCurrent: function(_currentDisplayMode) {
+
+      var newValues;
+      if(this._currentDisplayMode === 'day') {
+        newValues = this._constructMonth();
+      }else if(this._currentDisplayMode === 'month') {
+        newValues = this._constructYear();
+      }else {
+        newValues = this._constructYearRange();
+      }
+      this.set('_valuesDisplayed', newValues);
+
+    },
+    /**
+      * This event is fired when the user selects a date range in the calendar & 'preventRangeSelection' is false
+      *
+      * @event px-calendar-range-selected
+      * @param {object} range - {from, to} : the ISO 8601 Strings representing the date/time range selected by the user
+      * @param {object} momentObjs - {from, to} : the moment.js objects representing the date/time range selected by the user
+      */
+    /**
+      * This event is fired when the user selects a date in the calendar & 'preventRangeSelection' is true
+      *
+      * @event px-calendar-selected
+      * @param {object} dateTime : the ISO 8601 String representing the date/time selected by the user
+      * @param {object} momentObj : the moment.js object representing the date/time selected by the user
+      */
+
+
+    _selectDate: function(newSelectedDate) {
+      if (!this.preventRangeSelection && this.fromMoment && !this.toMoment) {
+        // treat the click as the second date - the range is selected!
+
+        if(newSelectedDate.isBefore(this.fromMoment)) {
+          //swap
+          this.set('toMoment', this.fromMoment);
+          this.set('fromMoment', this._preserveTime(this.fromMoment, newSelectedDate));
+
+        } else {
+          this.set('toMoment', this._preserveTime(this.toMoment, newSelectedDate));
+        }
+
+        this.fire('px-calendar-range-selected', {range: {from: this.fromMoment.toISOString(), to: this.toMoment.toISOString()}, momentObjs: {from: this.fromMoment, to: this.toMoment}});
+      }
+      else {
+        this.set('toMoment', null);
+        this.set('fromMoment', this._preserveTime(this.fromMoment, newSelectedDate));
+
+        if(this.preventRangeSelection) {
+          this.set('singleSelectedDate', this.fromMoment.toISOString());
+
+          this.fire('px-calendar-selected', {dateTime: this.fromMoment.toISOString(), momentObj: this.fromMoment});
+
+        }
+      }
+    },
+
+    _constructYear: function() {
+      //3 rows of 4 months
+      var current = this.baseDate.clone().month(0),
+          months = [];
+
+      for(var i=0; i<3; i++) {
+        months[i] = [];
+        for(var j=0; j<4; j++) {
+          months[i].push(current);
+          current = current.clone().add(1, 'months');
+        }
+      }
+
+      return months;
+    },
+
+    _constructYearRange: function() {
+      //2 rows of 5 years
+      var current = this.baseDate.clone(),
+          years = [];
+
+      for(var i=0; i<2; i++) {
+        years[i] = [];
+        for(var j=0; j<5; j++) {
+          years[i].push(current);
+          current = current.clone().add(1, 'years');
+        }
+      }
+
+      return years;
+    },
+
+    _constructMonth: function() {
+      if(this.baseDate){
+        var numberOfDaysInMonth = this.baseDate.daysInMonth(),
+            dayBeginningOfMonth = this.baseDate.clone().startOf('month').day(),
+            numberOfWeeks = 6, // will always have 6 weeks to make calendar not change height
+            daysBeforeMonthStartsCount = Px.moment.localeData().firstDayOfWeek(),
+            emptyCellsCount = dayBeginningOfMonth - daysBeforeMonthStartsCount,
+            date = 1,
+            month = [];
+
+        //make sure we have enough space to display the first day
+        if(emptyCellsCount < 0) {
+          emptyCellsCount += 7;
+        }
+
+        var week = [];
+        for(var j = 0; j< emptyCellsCount; j++) {
+          week.push(Px.moment(null)); // push empty cells on before the 1st of the month
+        }
+
+        for (var weekCount = 0; weekCount < numberOfWeeks; weekCount++) {
+
+          while (week.length < 7) {
+            if (date <= numberOfDaysInMonth) {
+              week.push(this.baseDate.clone().date(date));
+              date++;
+            }
+            else {
+              week.push(Px.moment(null)); // push empty cells on after the last day of the month (to fill the week, extra weeks)
+            }
+          }
+          month.push(week);
+          week = [];
+        }
+        return month;
+      }
+    },
+    /**
+     * Called when clicking the 'next' arrow
+     */
+    _onNext: function() {
+      //create a new moment object so Polymer knows the property has changed
+      var newMoment;
+      if(this._currentDisplayMode === 'day') {
+        newMoment = Px.moment.tz(this.baseDate.add(1, 'months'), this.timeZone);
+      }else if(this._currentDisplayMode === 'month') {
+        newMoment = Px.moment.tz(this.baseDate.add(1, 'years'), this.timeZone);
+      }
+      else {
+        newMoment = Px.moment.tz(this.baseDate.add(10, 'years'), this.timeZone);
+      }
+
+      this.set('baseDate', newMoment);
+      this._renderCurrent();
+    },
+    /**
+     * Called when clicking the 'previous' arrow
+     */
+    _onPrevious: function() {
+      //create a new moment object so Polymer knows the property has changed
+      var newMoment;
+      if(this._currentDisplayMode === 'day') {
+        newMoment = Px.moment.tz(this.baseDate.subtract(1, 'months'), this.timeZone);
+      }else if(this._currentDisplayMode === 'month') {
+        newMoment = Px.moment.tz(this.baseDate.subtract(1, 'years'), this.timeZone);
+      }
+      else {
+        newMoment = Px.moment.tz(this.baseDate.subtract(10, 'years'), this.timeZone);
+      }
+
+      this.set('baseDate', newMoment);
+      this._renderCurrent();
+    },
+
+    _isAtSelectionLevel: function(currentDisplayMode, displayMode) {
+      return currentDisplayMode === displayMode;
+    },
+
+    _baseDateChanged: function(newDate, oldDate) {
+      //rerender if we're in day mode and changed month or if we changed year
+      if(this._currentDisplayMode === 'day' &&
+         (newDate.isAfter(oldDate, 'month') || newDate.isBefore(oldDate, 'month'))) {
+        this._renderCurrent();
+      } else if(newDate.isAfter(oldDate, 'year') || newDate.isBefore(oldDate, 'year')) {
+        this._renderCurrent();
+      } else if (oldDate && newDate && newDate.tz() !== oldDate.tz()){
+        this._renderCurrent();
+      }
+    }
+  });
+</script>

@@ -1,0 +1,131 @@
+<!-- Common imports -->
+<link rel="import" href="../../polymer/polymer.html" />
+
+<!-- Common demo imports -->
+<link rel="import" href="../../px-demo/px-demo-header.html" />
+<link rel="import" href="../../px-demo/px-demo-api-viewer.html" />
+<link rel="import" href="../../px-demo/px-demo-footer.html" />
+<link rel="import" href="../../px-demo/px-demo-configs.html" />
+<link rel="import" href="../../px-demo/px-demo-props.html" />
+<link rel="import" href="../../px-demo/px-demo-interactive.html" />
+<link rel="import" href="../../px-demo/px-demo-component-snippet.html" />
+
+<!-- Imports for this component -->
+<link rel="import" href="../../px-demo/css/px-demo-styles.html" />
+<link rel="import" href="../../px-icon-set/px-icon.html" />
+<link rel="import" href="../px-card.html" />
+
+<!-- Demo DOM module -->
+<dom-module id="px-card-demo">
+  <template>
+    <style include="px-demo-styles" is="custom-style"></style>
+
+    <!-- Header -->
+    <px-demo-header
+        module-name="px-card"
+        description="Cards consist of a header area and content area. The header can
+          optionally contain a descriptive icon in the top left corner and/or an actions area in the top right corner
+          for settings or other action icons. Cards are incredibly flexible in terms of what content can be
+          placed in the main area of the card and how it's arranged. A few layout configurations are provided
+          in the px-widget-cards component to help you organize content in a responsive grid within a card.">
+    </px-demo-header>
+
+    <!-- Interactive -->
+    <px-demo-interactive>
+      <!-- Configs -->
+      <px-demo-configs configs="[[configs]]" props="{{props}}" chosen-config="{{chosenConfig}}"></px-demo-configs>
+
+      <!-- Props -->
+      <px-demo-props props="{{props}}" config="[[chosenConfig]]"></px-demo-props>
+
+      <!-- Component ---------------------------------------------------------->
+      <px-demo-component style="flex:0 0 100%">
+        <px-card
+          id="demo-card"
+          icon="{{props.icon.value}}"
+          header-text="{{props.headerText.value}}"
+          full-bleed="{{props.fullBleed.value}}">
+            <div class="actions">
+              <px-icon icon="px-nav:new-window"></px-icon>
+              <px-icon icon="px-nav:reload"></px-icon>
+              <px-icon icon="px-nav:more"></px-icon>
+            </div>
+            <p>This is the main content area of a Predix card.</p>
+        </px-card>
+      </px-demo-component>
+      <!-- END Component ------------------------------------------------------>
+
+      <px-demo-component-snippet
+        element-properties="{{props}}"
+        element-name="px-card">
+      </px-demo-component-snippet>
+    </px-demo-interactive>
+
+    <!-- API Viewer -->
+    <px-demo-api-viewer source="px-card" api-source-file-path="px-card/px-card-api.json"></px-demo-api-viewer>
+
+    <!-- Footer -->
+    <px-demo-footer></px-demo-footer>
+
+  </template>
+
+</dom-module>
+<script>
+  Polymer({
+    is: 'px-card-demo',
+
+    properties: {
+
+      props: {
+        type: Object,
+        value: function(){ return this.demoProps; }
+      },
+
+      configs: {
+        type: Array,
+        value: function(){
+          return [
+            {
+              configName: "Basic",
+              configReset: true
+            },
+            {
+              configName: "No icon",
+              headerText: "Card without icon",
+              icon: "",
+              fullBleed: true
+            }
+          ]
+        }
+      }
+    },
+
+    demoProps: {
+
+      headerText: {
+        type: String,
+        defaultValue: 'Card',
+        inputType: 'text'
+      },
+
+      icon: {
+        type: String,
+        defaultValue: 'px-fea:analysis',
+        inputType: 'text'
+      },
+
+      fullBleed: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      //for demo snippet
+      lightDomContent: {
+        type: String,
+        defaultValue: '<div class="actions"><px-icon icon="px-nav:new-window"></px-icon><px-icon icon="px-utl:help"></px-icon><px-icon icon="px-utl:app-settings"></px-icon></div><p>This is the main content area of a Predix card.</p>',
+      },
+    },
+
+  });
+</script>

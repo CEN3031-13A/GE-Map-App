@@ -1,0 +1,95 @@
+<!-- Common imports -->
+<link rel="import" href="../../polymer/polymer.html" />
+
+<!-- Common demo imports -->
+<link rel="import" href="../../px-demo/px-demo-header.html" />
+<link rel="import" href="../../px-demo/px-demo-api-viewer.html" />
+<link rel="import" href="../../px-demo/px-demo-footer.html" />
+<link rel="import" href="../../px-demo/px-demo-configs.html" />
+<link rel="import" href="../../px-demo/px-demo-props.html" />
+<link rel="import" href="../../px-demo/px-demo-interactive.html" />
+<link rel="import" href="../../px-demo/px-demo-component-snippet.html" />
+
+<!-- Imports for this componnent -->
+<link rel="import" href="../../px-demo/css/px-demo-styles.html" />
+<link rel="import" href="../px-card.html" />
+
+<!-- Demo DOM module -->
+<dom-module id="px-dashboard-demo">
+  <template>
+    <style include="px-demo-styles" is="custom-style"></style>
+
+    <!-- Header -->
+    <px-demo-header
+        module-name="px-dashboard"
+        parent-name="px-card"
+        description="A px-dashboard is a collection of decks and a chosen context.">
+    </px-demo-header>
+
+    <!-- API Viewer -->
+    <px-demo-api-viewer source="px-dashboard" api-source-file-path="px-card/px-card-api.json"></px-demo-api-viewer>
+
+    <!-- Footer -->
+    <px-demo-footer></px-demo-footer>
+
+  </template>
+
+</dom-module>
+<script>
+  Polymer({
+    is: 'px-dashboard-demo',
+
+    properties: {
+
+      props: {
+        type: Object,
+        value: function(){ return this.demoProps; }
+      },
+
+      configs: {
+        type: Array,
+        value: function(){
+          return [
+            {
+              configName: "Basic",
+              configReset: true
+            },
+            {
+              configName: "No icon",
+              headerText: "Card without icon",
+              icon: "",
+              fullBleed: true
+            }
+          ]
+        }
+      }
+    },
+
+    demoProps: {
+
+      headerText: {
+        type: String,
+        defaultValue: 'Card',
+        inputType: 'text'
+      },
+
+      icon: {
+        type: String,
+        defaultValue: 'analysis'
+      },
+
+      fullBleed: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle'
+      },
+
+      //for demo snippet
+      lightDomContent: {
+        type: String,
+        defaultValue: '<div class="actions"><iron-icon icon="px:launch"></iron-icon><iron-icon icon="px:help"></iron-icon><iron-icon icon="px:settings"></iron-icon></div><strong>Hello World</strong><p>This is the bare minimum you need for a Predix Experience card.</p>',
+      },
+    },
+
+  });
+</script>

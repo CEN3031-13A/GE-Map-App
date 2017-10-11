@@ -1,0 +1,48 @@
+{
+  "name": "px-number-formatter",
+  "version": "4.0.1",
+  "main": [
+    "px-number-formatter.html"
+  ],
+  "ignore": [
+    "*.enc",
+    ".*",
+    "npm-debug.log",
+    "gulpfile.js",
+    "sass",
+    "bower_components",
+    "node_modules",
+    "test",
+    "OSS_Notice.pdf",
+    "scripts",
+    ".github",
+    "px-number-formatter.png",
+    "LICENSE.md",
+    "CONTRIBUTING.md",
+    "HISTORY.md",
+    "README.md",
+    ".jshintrc",
+    ".editorconfig"
+  ],
+  "dependencies": {
+    "polymer": "^1.9.0",
+    "numbro": "~1.9.0"
+  },
+  "devDependencies": {
+    "px-theme": "^3.0.0",
+    "px-demo": "^2.0.0"
+  },
+  "resolutions": {
+    "webcomponentsjs": "^0.7.24"
+  },
+  "homepage": "https://github.com/PredixDev/px-number-formatter",
+  "_release": "4.0.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "v4.0.1",
+    "commit": "2ff9205a8157c21cf1a7a36ecd5c4ae8b3d958a8"
+  },
+  "_source": "https://github.com/PredixDev/px-number-formatter.git",
+  "_target": "^4.0.0",
+  "_originalSource": "px-number-formatter"
+}

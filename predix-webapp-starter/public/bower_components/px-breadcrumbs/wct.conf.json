@@ -1,0 +1,35 @@
+{
+  "verbose": false,
+  "compile": "auto",
+  "plugins": {
+    "local": {
+      "browsers": [
+        "chrome"
+      ]
+    },
+    "sauce": {
+      "disabled": true,
+      "browsers": [
+        {
+          "browserName": "microsoftedge",
+          "platform": "Windows 10",
+          "version": ""
+        },
+        {
+          "browserName": "safari",
+          "platform": "OS X 10.11",
+          "version": "10"
+        },
+        {
+          "browserName": "firefox",
+          "platform": "OS X 10.11",
+          "version": ""
+        }
+      ]
+    }
+  },
+  "suites": [
+    "test/px-breadcrumbs-test-fixture.html"
+  ]
+
+}

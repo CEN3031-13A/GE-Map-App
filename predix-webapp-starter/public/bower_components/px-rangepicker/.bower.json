@@ -1,0 +1,55 @@
+{
+  "name": "px-rangepicker",
+  "version": "2.1.1",
+  "main": [
+    "px-rangepicker.html"
+  ],
+  "ignore": [
+    "*.enc",
+    ".*",
+    "node_modules",
+    "bower_components",
+    "sass",
+    "HISTORY.md",
+    "CONTRIBUTING.md",
+    "OSS_Notice.pdf",
+    "scripts",
+    ".github",
+    ".editorconfig",
+    ".jshintrc",
+    ".gitignore",
+    "LICENSE.md",
+    "gulpfile.js",
+    "monogram-wdmk.png",
+    "README.md",
+    "wct.conf.json",
+    "px-rangepicker.png"
+  ],
+  "dependencies": {
+    "polymer": "^1.9.0",
+    "px-datetime-common": "^1.0.0",
+    "px-datetime-range-field": "^1.0.0",
+    "px-datetime-range-panel": "^1.0.0"
+  },
+  "devDependencies": {
+    "px-theme": "^3.0.0",
+    "px-demo": "^2.0.0",
+    "px-box-sizing-design": "^1.0.0",
+    "px-normalize-design": "^1.0.0",
+    "px-helpers-design": "^1.0.0",
+    "px-spacing-design": "^1.0.0"
+  },
+  "resolutions": {
+    "webcomponentsjs": "^0.7.24"
+  },
+  "homepage": "https://github.com/PredixDev/px-rangepicker",
+  "_release": "2.1.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "v2.1.1",
+    "commit": "ae734a0e598a4dc3f59f47f06b03a2ee46de7c52"
+  },
+  "_source": "https://github.com/PredixDev/px-rangepicker.git",
+  "_target": "^2.0.0",
+  "_originalSource": "px-rangepicker"
+}

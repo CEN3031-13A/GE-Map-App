@@ -1,0 +1,502 @@
+<link rel="import" href="../polymer/polymer.html"/>
+<link rel="import" href="../px-datetime-common/px-datetime-entry.html"/>
+<link rel="import" href="../px-datetime-common/px-datetime-behavior.html"/>
+<link rel="import" href="../px-datetime-common/validate.html"/>
+<link rel="import" href="../px-datetime-common/px-datetime-buttons.html"/>
+<link rel="import" href="../px-datetime-common/px-datetime-button-behavior.html"/>
+<link rel="import" href="css/px-datetime-field-styles.html"/>
+
+<!--
+The datetime components rely on <a href="https://momentjs.com/" target="_blank">Moment.js</a> and <a href="https://momentjs.com/timezone/" target="_blank">Moment Timezone</a>.
+
+### Usage
+
+    <px-datetime-field></px-datetime-field>
+
+
+### Styling
+The following custom property is available for styling. Please also refer to px-forms-design for additional variables that can be used to customize the field's appearance.
+
+Custom property | Description
+:----------------|:-------------
+`--px-datetime-field-background-color` | Background color for field and validation
+`--px-datetime-field-height`  | Sets the height of the input field
+`px-input` css variables | Impacts the input text, border, and background colors
+`px-validation-error` css variables | Impacts validation error text and background color
+
+
+@element px-datetime-field
+@blurb Element providing solution to no problem in particular.
+@homepage index.html
+@demo index.html
+-->
+<dom-module id="px-datetime-field">
+  <template>
+    <style include="px-datetime-field-styles"></style>
+
+    <div class$="{{_getWrapClass(allowWrap)}} flex">
+      <div class$="{{_getButtonMarginClass(showButtons, allowWrap)}}">
+        <div id="fieldWrapper" class$="{{_getWrapperClass(dateIsValid, timeIsValid, _forcedFailedClass, isSelected, _dropdownActive, _dropdownHoverFix)}}">
+          <template is="dom-if" if="[[!hideDate]]">
+            <px-datetime-entry
+              id="date"
+              class$="{{_getEntryDateClass(hideDate, hideTime, hideIcon)}}"
+              date-or-time="Date"
+              moment-format="{{dateFormat}}"
+              moment-obj="{{momentObj}}"
+              is-valid="{{dateIsValid}}"
+              is-selected="{{isSelected}}"
+              hide-icon="{{hideIcon}}"
+              time-zone="{{timeZone}}"
+              show-time-zone="{{_showTimeZoneInDate(hideTime, showTimeZone)}}"
+              block-future-dates="{{blockFutureDates}}"
+              block-past-dates="{{blockPastDates}}"
+              min="{{min}}"
+              max="{{max}}"
+              resources="[[resources]]"
+              language="[[language]]"
+              formats="[[formats]]">
+            </px-datetime-entry>
+          </template>
+          <template is="dom-if" if="[[!hideTime]]">
+            <px-datetime-entry
+              id="time"
+              date-or-time="Time"
+              moment-format="{{timeFormat}}"
+              show-time-zone="{{showTimeZone}}"
+              moment-obj="{{momentObj}}"
+              is-valid="{{timeIsValid}}"
+              hide-icon="{{hideIcon}}"
+              time-zone="{{timeZone}}"
+              is-selected="{{isSelected}}"
+              block-future-dates="{{blockFutureDates}}"
+              block-past-dates="{{blockPastDates}}"
+              min="{{min}}"
+              max="{{max}}"
+              resources="[[resources]]"
+              language="[[language]]"
+              formats="[[formats]]">
+            </px-datetime-entry>
+          </template>
+        </div>
+        <template is="dom-if" if="[[_showValidation(isValid, showValidationMessage)]]">
+          <div class="form-field__help validation-error dt-validation-text">{{_validationErrorMessage}}</div>
+        </template>
+      </div>
+      <template is="dom-if" if="{{showButtons}}">
+        <px-datetime-buttons
+          is-submit-button-valid="[[isValid]]"
+          resources="[[resources]]"
+          language="[[language]]"
+          formats="[[formats]]">
+        </px-datetime-buttons>
+      </template>
+    </div>
+  </template>
+</dom-module>
+
+<script>
+  Polymer({
+    is: 'px-datetime-field',
+
+    behaviors: [
+      pxDatetimeBehavior,
+      pxDatetimeButtonBehavior
+    ],
+
+    properties: {
+      /**
+       * Moment format string for the DATE format to display/validate this field against
+       * Year, month, day and offset tokens (Do not support Y, Q, MMM, MMMM, or Do)
+       * (see http://momentjs.com/docs/#/parsing/string-format/)
+       *
+       */
+      dateFormat: {
+          type: String,
+          value: 'YYYY-MM-DD'
+      },
+      /**
+       * Moment format string for the TIME format to display/validate this field against
+       * Hour, minute, second, millisecond, and offset tokens
+       * (see http://momentjs.com/docs/#/parsing/string-format/)
+       *
+       */
+      timeFormat: {
+          type: String,
+          value: 'HH:mm:ss'
+      },
+      /**
+       *
+       * Can be set to show the timezone. Can have 2 values:
+       *  - 'dropdown': shows the time zone as a dropdown which the user can use to select a different time zone. Only contains a subset of all timezones
+       *  - 'extendedDropdown': shows the time zone as a dropdown which the user can use to select a different time zone. Contains all existing timezones (588)
+       *  - 'text': shows the time zone as text, non editable
+       *  - 'abbreviatedText': shows the time zone as an abbreviated text, non editable (such as PST, EST...)
+       */
+      showTimeZone: {
+        type: String,
+        value: ''
+      },
+      /**
+       * Controls whether time is displayed in this field
+       */
+      hideTime: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Controls whether date should be hidden in this field. Typically used
+       * in combination with hideTime to make the field showing only the time
+       */
+      hideDate: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Controls whether the calendar/clock icon should be hidden
+       */
+      hideIcon: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Controls whether the buttons will wrap under the field if the horizontal
+       * space is too small.
+       */
+      allowWrap: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Reflects if the date shown is valid.
+       * @private
+       */
+      dateIsValid: {
+        type: Boolean,
+        value: true,
+        notify: true
+      },
+      /**
+       * Reflects if the time shown is valid.
+       * @private
+       */
+      timeIsValid: {
+        type: Boolean,
+        value: true,
+        notify: true
+      },
+      /**
+       * If showing only the date whether the date is valid,
+       * if showing only thetime whether the time is valid,
+       * if showing both whether both are valids
+       */
+      isValid: {
+        type: Boolean,
+        notify: true,
+        computed: '_getIsValid(dateIsValid, timeIsValid)'
+      },
+      /**
+       * Determines whether to display the validation message or not.
+       * Use mostly by datetime-range-field.
+       */
+      showValidationMessage:{
+        type: Boolean,
+        value: true
+      },
+      /**
+       * Used to display the error message when an entry in not valid
+       */
+      _validationErrorMessage: {
+        type: String,
+        value: ''
+      },
+      /**
+       * Used to determine if the 'validation-failed' class need to be applied to '_getWrapperClass'
+       * this attribute is set by px-datetime-rage-field
+       * @private
+       */
+      _forcedFailedClass: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * True if any cell is currently selected.
+       * @private
+       */
+      isSelected: {
+        type: Boolean,
+        notify: true
+      },
+      /**
+       * Used to prevent this element from firing px-datetime-range-submitted
+       * event and prevent changes to range
+       */
+      preventNotificationOnChange: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Toggles the `dt-dropdown-is-active` class
+       */
+      _dropdownActive: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * Toggles the `.dt-text-field--hover-fix` class
+       */
+      _dropdownHoverFix: {
+        type: Boolean,
+        value: false
+      }
+    },
+
+    listeners: {
+      'px-datetime-entry-icon-clicked':'_iconClicked',
+      'px-next-field': '_nextFieldRequired',
+      'px-previous-field': '_previousFieldRequired',
+      'px-datetime-button-clicked': '_dateTimeButtons',
+      'px-validation-message' : '_handleValidationMessage',
+      'px-dropdown-focused': '_handleDropdownFocus',
+      'px-dropdown-blured': '_handleDropdownBlur'
+    },
+
+    observers: ['_momentChanged(momentObj)'],
+
+    /*
+     * Will only show the dropdown in the date entry if `hideTime`
+     * and `showTimeZone` are true
+     */
+    _showTimeZoneInDate: function(hideTime, showTimeZone) {
+      if(hideTime || hideTime === true) {
+        return showTimeZone;
+      }else {
+        return '';
+      }
+    },
+    /**
+     * Key bindings for iron-a11y-keys-behavior
+     */
+    keyBindings: {
+      'esc' : '_onEsc',
+      'enter': '_onEnter'
+    },
+    /*
+     * Jumps from the date field to time field when using arrow keys
+     */
+    _nextFieldRequired: function(evt) {
+      var date = this.$$('#date');
+
+      //if this comes from date do some logic, otherwise let it propagate
+      if(date && evt.detail.dateOrTime === 'Date') {
+        if(!this.hideTime) {
+          this.$$('#time')._focusCell(0);
+          evt.stopPropagation();
+          evt.stopImmediatePropagation();
+        }
+      }
+    },
+    /*
+     * Jumps from the time field to date field when using arrow keys
+     */
+    _previousFieldRequired: function(evt) {
+      var time = this.$$('#time');
+
+      //if this comes from time do some logic, otherwise let it propagate
+      if(time && evt.detail.dateOrTime === 'Time') {
+        if(!this.hideDate) {
+          this.$$('#date')._focusLastCell();
+          evt.stopPropagation();
+          evt.stopImmediatePropagation();
+        }
+      }
+    },
+    /*
+     * Not sure if this is used
+     */
+    _focusFirstEntry: function(forceTimeFocus) {
+      if(!this.hideDate && !forceTimeFocus) {
+        this.$$('#date')._focusCell(0);
+      } else {
+        this.$$('#time')._focusCell(0);
+      }
+    },
+    /*
+     * Not sure if this is used
+     */
+    _focusLastEntry: function() {
+      if(!this.hideTime) {
+        this.$$('#time')._focusLastCell();
+      } else {
+        this.$$('#date')._focusLastCell();
+      }
+    },
+    /**
+     * Toggles classes causing the buttons to wrap under the field
+     */
+    _getWrapClass: function(allowWrap){
+      if(allowWrap){
+        return "flex--wrap";
+      }
+    },
+    /**
+     * Adds a margin right if the button are showing
+     */
+    _getButtonMarginClass: function(showButtons, allowWrap) {
+      var classList = "dt-field-validation-wrapper ";
+      if(showButtons){
+        classList += "u-mr- ";
+
+        if(allowWrap) {
+          classList += "u-pb+";
+        }
+      }
+      return classList;
+    },
+    /**
+     * event that watches when the dropdown has focus
+     */
+    _handleDropdownFocus: function(e){
+      e.stopPropagation();
+      this.set('_dropdownActive', true);
+    },
+    /**
+     * event that watches when the dropdown loses focus
+     */
+    _handleDropdownBlur: function(e){
+      e.stopPropagation();
+      this.set('_dropdownActive', false);
+      this._handleHoverFix();
+    },
+    /**
+     * when dt-field is detached set `_dropdownFocused` to false.
+     * prevents the dropdown from being stuck in a focused state
+     */
+    detached: function(){
+      this._dropdownFocused = false;
+    },
+    /**
+     * This is a quick fix.
+     * Inorder to make dt-field look like an input field we have to overwrite some css on #fieldWrapper.
+     *
+     * There is a hover state on #fieldWrapper and px-dropdown is a child of #fieldWrapper;
+     * therefore, when dropdown is opened the hover to #fieldWrapper is extended.
+     * This causes a flash of gray when the user selects a timezone with the mouse.
+     * Inorder to prevent this flash we need to overwrite the hover state by added
+     * `.dt-text-field--hover-fix` to #fieldWrapper.
+     *
+     * The true issue is that we can't listen to px-dropdown.opened because there is a timing issue
+     * when px-dropdown.opened is set to false vs when the dropdown is not longer visable. This causes the flash.
+     * We couldn't find anyother events that don't have a timing issue.
+     */
+    _handleHoverFix: function(){
+      this.set('_dropdownHoverFix', true);
+      this.async(function(){
+        this.set('_dropdownHoverFix', false);
+      },1000);
+    },
+    /**
+     * dateIsValid, timeIsValid, & _forcedFailedClass - determine weither to show the validation error classes
+     * isSelected - sets the styles when an entryCell is selected
+     * _dropdownActive - overwrites the styles when the dropdown is focused
+     * _dropdownHoverFix - overwrites the styles when the user selects an item in the dropdown
+     */
+    _getWrapperClass: function(dateIsValid, timeIsValid, _forcedFailedClass, isSelected, _dropdownActive, _dropdownHoverFix) {
+      var classList = "flex flex--middle dt-text-field ";
+
+      if(dateIsValid !== true || timeIsValid !== true || _forcedFailedClass === true) {
+        classList += "validation-error validation-failed ";
+      } else if(isSelected) {
+        classList += "dt-is-selected ";
+      } else if(_dropdownActive){
+        classList += "dt-dropdown-is-active ";
+      } else if (_dropdownHoverFix){
+        classList += "dt-text-field--hover-fix ";
+      }
+      return classList;
+    },
+    /**
+     * Addes a margin right if both entries are showing
+     */
+    _getEntryDateClass: function(hideDate, hideTime, hideIcon) {
+      var classList = "";
+      if(hideDate === false && hideTime === false && hideIcon === true) {
+        classList += "u-mr+ ";
+      } else if (hideDate === false && hideTime === false){
+        classList += "u-mr- ";
+      }
+
+      return classList;
+    },
+    /**
+     * Computes the `isValid` prop
+     */
+    _getIsValid: function(dateIsValid, timeIsValid) {
+      return dateIsValid && timeIsValid;
+    },
+    /**
+     * Listener for the validation message to change and reflect the changes to _validationErrorMessage
+     */
+    _handleValidationMessage: function(e){
+      this.set('_validationErrorMessage', e.detail.validationErrorMessage);
+    },
+    /**
+     * Range validation error has peridence over the field validation error
+     * If the range is invalid then display nothing here
+     */
+    _showValidation:function(isValid, showValidationMessage){
+      if(showValidationMessage && !isValid){
+        return true;
+      } else {
+        return false;
+      }
+    },
+    /*
+     * Focuses select to the next cell when an icon is clicked
+     */
+    _iconClicked: function(evt) {
+      if(evt.detail.dateOrTime === "Date") {
+        this.$$('#date')._focusCell(0);
+      } else {
+        this.$$('#time')._focusCell(0);
+      }
+    },
+    /**
+     * Observer on the momentObj. If vaid and buttons are hidden apply changes
+     * will not run from `px-datetime-range-submitted`
+     */
+    _momentChanged: function(momentObj) {
+      if(this.isValid === true && !this.showButtons && !this.preventNotificationOnChange) {
+        this._applyCurrentValues(true);
+      }
+    },
+    /**
+     * Listens for a button click and will apply or cancel
+     * based on the event
+     * will not run from `px-datetime-range-submitted`
+     */
+    _dateTimeButtons: function(evt) {
+      if(!this.preventNotificationOnChange) {
+        this._applyCurrentValues(evt.detail.action);
+      }
+    },
+    /**
+     * When buttons are showing, it will clear changes
+     * will not run from `px-datetime-range-submitted`
+     */
+    _onEsc: function(evt) {
+      if(this.showButtons && !this.preventNotificationOnChange) {
+        this._applyCurrentValues(false);
+      }
+    },
+    /**
+     * When buttons are showing, it will apply changes
+     * will not run from `px-datetime-range-submitted`
+     */
+    _onEnter: function(evt) {
+      if(this.showButtons && !this.preventNotificationOnChange) {
+        this._applyCurrentValues(true);
+      }
+    },
+  });
+</script>

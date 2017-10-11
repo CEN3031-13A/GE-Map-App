@@ -1,0 +1,300 @@
+<!--
+    Relative paths assume component is being run from inside an app or another component, where dependencies are flat
+    siblings. When this component is run from its own repo (e.g. ui tests, examples), we assume the server is started with
+    'grunt depserve' (or similar server setup) to enable correct finding of bower dependencies for local runs.
+-->
+<link rel="import" href="../polymer/polymer.html"/>
+
+<dom-module id="px-view">
+  <template>
+    <!-- insert element here -->
+  </template>
+
+  <script>
+    'use strict';
+
+    Polymer({
+
+      is: 'px-view',
+
+      properties: {
+        /**
+         *
+         * Set the 'active' attribute on the <px-view> element to true and the components will be
+         * loaded and displayed
+         *
+         * @attribute preload
+         * @type Boolean
+         * @default false
+        */
+        active: {
+          type: Boolean,
+          value: false
+        },
+        /**
+         *
+         * Set the 'preload' attribute on the <px-view> element and the components will be
+         * loaded immediately or
+         * lazy-loaded on demand. Lazy-loading is on by default to avoid unnecessary HTTP requests.
+         *
+         * @attribute preload
+         * @type Boolean
+         * @default false
+        */
+        preload: {
+          type: Boolean,
+          value: false
+        },
+        
+        /**
+         *
+         * Set to true to load this view asynchronously.
+         *
+         * @attribute loadAsync
+         * @type Boolean
+         * @default false
+        */
+        loadAsync: {
+          type: Boolean,
+          value: false
+        },
+        /**
+         *
+         * Status tracks a px-view component over it's lifecycle
+         * Steps: 'unloaded' -> 'loading' -> 'loaded' || 'failed' -> 'attached' -> 'hidden' || 'shown'
+         *
+         * @attribute status
+         * @type String
+         * @readonly
+         * @access public
+        */
+        status: {
+          type: String,
+          value: 'unloaded',
+          notify: true,
+          reflectToAttribute: true,
+          observer: '_statusChanged'
+        },
+        /**
+         *
+         * elementTagName sets the name of the tag to attach to the DOM which must match component name
+         *
+         * @attribute elementTagName
+         * @type String
+         * @access private
+        */
+        _elementTagName: {
+          type: String,
+          computed: '_computeElementTagName(elementHref)',
+          observer: '_elementTagNameUpdated'
+        },
+        /**
+         *
+         * elementHref defines relative URL path of web component html file
+         *
+         * @attribute elementHref
+         * @type String
+         * @access public
+        */
+        elementHref: {
+          type: String
+        },
+        /**
+         *
+         * The display property defines the value of the component's display property when view is shown
+         *
+         * @attribute elementHref
+         * @type String
+         * @access public
+         * @default 'block'
+        */
+        display: {
+          type: String,
+          value: "block"
+        },
+        /**
+         *
+         * Data to be passd through to view when it is attached.
+         * Must be passed in as a stringified object using JSON.stringify()
+         *
+         * @attribute elementData
+         * @type Object
+         * @access public
+         * @default {}
+        */
+        elementData: {
+          type: Object,
+          value: function() { return {}; }
+        },
+
+        _importLink: {
+          type: Object,
+          value: function() { return {}; }
+        }
+
+      },
+
+      observers: [
+        '_checkStatus(status, active, preload, display, _elementTagName)',
+      ],
+
+      _element: null, // Reference to the loaded view DOM element
+
+      // when state is 'unloaded', if active or preload are true, start loading
+      _onUnloaded: function() {
+        if (this.active || this.preload) {
+          this._loadElement();
+        }
+      },
+
+      _isElementRegistered: function(elementId) {
+        var list = Polymer.telemetry.registrations;
+        // Mimics Array#find
+        for (var i = 0, length = list.length; i < length; i++) {
+          var element = list[i];
+          if (element.is === elementId) {
+            return true;
+          }
+        }
+        return false;
+      },
+
+      _onLoading: function() {
+        // do nothing
+      },
+
+      // when state is 'loaded', if active, attach element to DOM
+      _onLoaded: function() {
+        if (this.active) {
+          this._attachElement();
+        }
+      },
+
+      // when state is 'attached', if active, set status to 'shown', otherwise 'hidden'
+      _onAttached: function() {
+        var newStatus = this.active ? 'shown' : 'hidden';
+        this.set('status', newStatus);
+      },
+
+      // when state is 'shown', if active, set element display property
+      _onShown: function() {
+        if (this.active) {
+          this._element.style.display = this.display;
+        } else {
+          this.set('status', 'hidden');
+        }
+      },
+
+      // when state is 'hidden', if active, set element display property to 'none'
+      _onHidden: function() {
+        if (!this.active) {
+          this._element.style.display = 'none';
+        } else {
+          this.set('status', 'shown');
+        }
+      },
+
+      // _stateFunctions is an object literal with references to functions
+      // this maps state string values to state functions
+      _getStateFunction: function(status) {
+        var stateFunctions = {
+          'unloaded': this._onUnloaded,
+          'loading': this._onLoading,
+          'loaded': this._onLoaded,
+          'attached': this._onAttached,
+          'shown': this._onShown,
+          'hidden': this._onHidden
+        };
+        return stateFunctions[status];
+      },
+
+      // 'unloaded' -> 'loading' -> 'loaded' || 'failed' -> 'attached' -> 'hidden' || 'shown'
+      _checkStatus: function() {
+        // lookup state function and call it using fn.apply to maintain scope
+        this._getStateFunction(this.status).apply(this);
+      },
+
+      _attachElement: function() {
+        // confirm element tag name matches loaded element
+        this._element = document.createElement(this._elementTagName);
+        this._element.id = this._elementTagName + '-' + new Date().getTime();
+        this._element.setAttribute('element-data', JSON.stringify(this.elementData));
+        Polymer.dom(this.root).appendChild(this._element);
+        this.set('status', 'attached');
+      },
+
+      _loadElement: function() {
+        this.set('status', 'loading');
+        var that = this;
+
+        // check if this element is already registered, e.g. from a vulcanized bundle
+        if(this._isElementRegistered(this._elementTagName)){
+          that.set('status', 'loaded');
+        } else {
+          this._importLink = this.importHref(this.elementHref, function(e) {
+            if (Object.getOwnPropertyNames(that._importLink).length == 0) {
+              that.set('status', 'loaded');
+            } else {
+              var modulesLoaded = Polymer.dom(that._importLink.import).querySelectorAll('dom-module');
+              if (modulesLoaded.some(function(ele) {return ele.id === that._elementTagName;})) {
+                that.set('status', 'loaded');
+              } else {
+                console.log('Error: dom-module of imported element does not match element tag name');
+                that.set('status', 'failed');
+              }
+            }
+          }, function(error) {
+            this.set('status', 'failed');
+          }, this.loadAsync);
+        }
+      },
+
+      _computeElementTagName: function() {
+        var filenameRegex = /(?=([\w-]+)\.\w{3,4}$).+/;
+        var match;
+        if ((match = filenameRegex.exec(this.elementHref)) !== null) {
+          if (match.index === filenameRegex.lastIndex) {
+            filenameRegex.lastIndex++;
+          }
+        }
+        return match[1];
+      },
+
+      _elementTagNameUpdated: function(current, previous) {
+        if(typeof previous !== 'undefined') {
+          // polymer has changed the tagname, time to reset!
+          this._resetView();
+        }
+      },
+
+      _resetView: function() {
+        this._removeAllElements();
+        this.set('_importLink', {});
+        this.set('status', 'unloaded');
+      },
+
+      _removeAllElements: function() {
+        var nodes = Polymer.dom(this.root).children;
+        var that = this;
+
+        nodes.forEach(
+          function(node) {
+            Polymer.dom(that.root).removeChild(node);
+          }
+        );
+      },
+
+      /**
+       * Fired whenever the view status is changed.
+       * @event view-status-changed
+       * @param {String} {The view status}
+       */
+      _statusChanged: function() {
+        if (this._element) {
+          this.fire('px-view-status-changed', { status: this.status }, { node: this._element, bubbles: false });
+        }
+      }
+
+    });
+  </script>
+</dom-module>
