@@ -1,0 +1,303 @@
+<!-- Common imports -->
+<link rel="import" href="../../polymer/polymer.html" />
+
+<!-- Common demo imports -->
+<link rel="import" href="../../px-demo/px-demo-header.html" />
+<link rel="import" href="../../px-demo/px-demo-api-viewer.html" />
+<link rel="import" href="../../px-demo/px-demo-footer.html" />
+<link rel="import" href="../../px-demo/px-demo-configs.html" />
+<link rel="import" href="../../px-demo/px-demo-props.html" />
+<link rel="import" href="../../px-demo/px-demo-interactive.html" />
+<link rel="import" href="../../px-demo/px-demo-component-snippet.html" />
+
+<!-- Imports for this component -->
+<link rel="import" href="../../px-code-design/css/px-code-design-demo-styles.html" />
+<link rel="import" href="../../px-demo/css/px-demo-styles.html" />
+<link rel="import" href="../px-icon-set.html" />
+
+<!-- Demo DOM module -->
+<dom-module id="px-icon-set-demo">
+  <template>
+    <style include="px-demo-styles" is="custom-style">
+      px-icon {
+        margin: 5px;
+      }
+      .epsilon {
+        margin-bottom: 10px;
+        margin-top: 10px;
+      }
+      .column {
+        width: 25%;
+      }
+      @media (max-width: 800px) {
+        .column {
+          width: 100%;
+        }
+      }
+      .cheatsheet {
+        display: flex;
+        margin-bottom: 10px;
+        margin-right: 10px;
+        align-items: center;
+      }
+      .cheatsheet px-icon {
+        margin-right: 10px;
+      }
+    </style>
+
+    <!-- Header -->
+    <px-demo-header
+        module-name="px-icon-set"
+        description="Wrapper for the Predix icon set which leverages px-icon. Please refer to the px-icon API and the full list of Predix icons below the demo.">
+    </px-demo-header>
+
+    <!-- Interactive -->
+    <px-demo-interactive>
+      <!-- Configs -->
+      <px-demo-configs configs="[[configs]]" props="{{props}}" chosen-config="{{chosenConfig}}"></px-demo-configs>
+
+      <!-- Props -->
+      <px-demo-props props="{{props}}" config="[[chosenConfig]]"></px-demo-props>
+
+      <!-- Component ---------------------------------------------------------->
+      <px-demo-component>
+        <px-icon id="demoIcon" icon="[[props.icon.value]]"></px-icon>
+      </px-demo-component>
+      <!-- END Component ------------------------------------------------------>
+
+      <px-demo-component-snippet
+          element-properties="{{_propsSubset(props.*)}}"
+          element-name="px-icon"
+          parent-name="px-icon-set"
+          links-includes='["px-icon-set/px-icon-set.html","px-icon-set/px-icon.html"]'
+          no-indentation>
+      </px-demo-component-snippet>
+    </px-demo-interactive>
+
+    <div class="demo-layout--center demo-u-pb+++ u-pt++">
+      <h3 class="beta">Cheatsheet</h3>
+
+      <template is="dom-repeat" items="[[iconSets]]" as="s">
+        <h3 class="delta">[[_returnTitle(s)]]</h3>
+        <div style="display:flex;flex-direction:row;flex-wrap:wrap;">
+          <template is="dom-repeat" items="[[iconCols]]" as="i">
+            <div class="column">
+              <template is="dom-repeat" items="[[_getItems(iconsGrouped.*, i, s)]]">
+                <span class="cheatsheet"><px-icon class="icon" icon="[[item]]"></px-icon>[[item]]</span>
+              </template>
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+
+    <div class="demo-layout--center demo-u-pb+++ u-pt++">
+      <h4 class="gamma">How to use</h4>
+
+      <br />
+      <h5 class="epsilon">Step one</h5>
+      <p>Import both the icon set and the px-icon component</p>
+
+      <figure class="code">
+        <code >
+          &lt;link rel="import" href="../px-icon-set.html" /&gt;
+          <br />
+          &lt;link rel="import" href="../px-icon.html" /&gt;
+        </code>
+      </figure>
+
+      <p>px-icon-set imports ALL px icons sets. You can also import just the ones you want individually instead.</p>
+
+      <br />
+      <h5 class="epsilon">Step two</h5>
+      <p>Use px-icon on your page with the icon attribute set to your icon.</p>
+      <figure class="code">
+        <code >
+          &lt;px-icon icon="px-fea:deployments"&gt;&lt;/px-icon&gt;
+        </code>
+      </figure>
+
+      <px-icon icon="px-fea:deployments"></px-icon>
+
+      <p>Unlike iron-icon, each icon will auto size to its default, optimized size, listed in the above cheatsheet. If you need to change the size, proceed to Step Three</p>
+
+      <br />
+      <h5 class="epsilon">Optional: Step three</h5>
+      <p>You can customize the icon size and color with CSS variables</p>
+      <figure class="code">
+        <code >
+          &lt;style&gt;
+          <br />
+            &nbsp;&nbsp;.custom-icon {<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;--iron-icon-width: 50px;<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;--iron-icon-height: 50px;<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;color: salmon;<br />
+            &nbsp;&nbsp;}
+          <br />
+          &lt;/style&gt;
+          <br />
+          <br />
+          &lt;px-icon class="custom-icon" icon="px-fea:deployments"&gt;&lt;/px-icon&gt;
+        </code>
+      </figure>
+
+      <style>
+        .custom-icon {
+          --iron-icon-width: 50px;
+          --iron-icon-height: 50px;
+          color: salmon;
+        }
+      </style>
+      <px-icon class="custom-icon" icon="px-fea:deployments"></px-icon>
+
+
+      <p>Under the hood, px-icon uses iron-icon, so you can apply changes using the iron-icon variables</p>
+    </div>
+
+    <!-- Footer -->
+    <px-demo-footer></px-demo-footer>
+
+  </template>
+
+</dom-module>
+<script>
+  Polymer({
+    is: 'px-icon-set-demo',
+
+    properties: {
+
+      props: {
+        type: Object,
+        value: function(){ return this.demoProps; }
+      },
+
+      configs: {
+        type: Array,
+        value: function() {
+          return [
+            { configName: "All icons",
+              configShowProps: []
+            }
+          ]
+        },
+
+        iconCols: {
+          type: Array
+        },
+
+        iconSets: {
+          type: Array
+        },
+
+        iconsGrouped: {
+          type: Object
+        }
+      }
+    },
+
+    /**
+     * A reference for `this.props`. Read the documentation there.
+     */
+    demoProps: {
+      icon: {
+        type: String,
+        defaultValue: 'px-fea:analysis',
+        inputType: 'text'
+      },
+      useCustomSize: {
+        type: Boolean,
+        defaultValue: false,
+        inputType: 'toggle',
+        inputHelpText: "DEMO ONLY; activates the size field"
+      },
+      customSize: {
+        type: String,
+        defaultValue: '32px',
+        inputType: 'text',
+        inputHelpText: "DEMO ONLY; in production, apply custom size via CSS --iron-icon variables"
+      }
+    },
+
+    observers: [
+      'triggerSizeChange(props.customSize.value)'
+    ],
+
+    ready: function() {
+      this.dynamicLoadIcons();
+    },
+    dynamicLoadIcons: function() {
+      var iconCol = [0,1,2,3],
+          iconSets = ['px-doc', 'px-utl', 'px-nav', 'px-com', 'px-fea', 'px-obj', 'px-vis'],
+          meta = Polymer.Base.create('iron-meta', {type: 'iconset'}),
+          sets = {};
+
+      iconSets.forEach(function(set) {
+        var iconSet = meta.byKey(set),
+            iconNames = iconSet.getIconNames(),
+            numOfGroups = iconCol.length,
+            iconsPerGroup = Math.ceil(iconNames.length / numOfGroups)
+            grouped = [];
+
+        for (var i = 0, j = iconNames.length; i < j; i += iconsPerGroup) {
+          grouped.push(iconNames.slice(i,i+iconsPerGroup));
+        }
+
+        sets[set] = grouped;
+      });
+
+      this.set('iconsGrouped', sets);
+      this.set('iconCols', iconCol);
+      this.set('iconSets', iconSets);
+    },
+
+    _returnTitle: function(s) {
+      var t;
+
+      switch(s) {
+        case 'px-doc':
+          t = 'Document : Small - 16px';
+          break;
+        case 'px-utl':
+          t = 'Utility : Small - 16px';
+          break;
+        case 'px-nav':
+          t = 'Navigation : Medium - 22px';
+          break;
+        case 'px-com':
+          t = 'Communication : Large - 32px';
+          break;
+        case 'px-fea':
+          t = 'Feature : Large - 32px';
+          break;
+        case 'px-obj':
+          t = 'Object : Large - 32px';
+          break;
+        case 'px-vis':
+          t = 'Visualization : Medium - 22px';
+          break;
+      }
+
+      return t;
+    },
+
+    _getItems: function(groups, i, s) {
+      if(groups.value && groups.value[s] && groups.value[s][i]) {
+        return groups.value[s][i];
+      }
+    },
+
+    triggerSizeChange: function(value) {
+      if(this.props.useCustomSize.value) {
+        this.$.demoIcon.customStyle['--px-icon-default-width'] = value;
+        this.$.demoIcon.customStyle['--px-icon-default-height'] = value;
+        this.$.demoIcon.updateStyles();
+      }
+    },
+
+    _propsSubset: function() {
+      var o = {};
+      o['icon'] = this.props.icon;
+      return o;
+    }
+  });
+</script>
