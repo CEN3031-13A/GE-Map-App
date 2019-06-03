@@ -172,7 +172,7 @@ Generating animations
 [**Live demo**](http://jsbin.com/xolacasiyu/edit?js,output)
 ```html
 <!DOCTYPE html>
-<script src="https://rawgit.com/web-animations/web-animations-js/master/web-animations.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/web-animations/web-animations-js/web-animations.min.js"></script>
 
 <style>
 #perspective {
